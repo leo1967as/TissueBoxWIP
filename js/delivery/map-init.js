@@ -18,6 +18,9 @@ window.initMap = function() {
     }
   });
 
+    // เมื่อคลิกที่แผนที่ ให้เรียกใช้ฟังก์ชัน handleMapClick
+    map.addListener("click", handleMapClick);
+
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -37,7 +40,7 @@ window.initMap = function() {
           userMarker = new google.maps.Marker({
             position: userLocation,
             map: map,
-            title: "ตำแหน่งของคุณ",
+
             icon: {
               url: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
               scaledSize: new google.maps.Size(40, 40)

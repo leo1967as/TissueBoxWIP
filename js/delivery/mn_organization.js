@@ -209,10 +209,8 @@ function showAlert(type, title, message) {
   }
 }
 
-// ฟังก์ชันสำหรับเปิด Modal เพื่อแก้ไขข้อมูลหน่วยงาน
 async function editOrganization(orgId) {
   try {
-    // ดึงข้อมูลจาก Firestore ด้วย orgId
     const db = firebase.firestore();
     const orgRef = db.collection("organizations").doc(orgId);
     const doc = await orgRef.get();
@@ -220,21 +218,32 @@ async function editOrganization(orgId) {
     if (doc.exists) {
       const orgData = doc.data();
 
+            // เก็บค่าปัจจุบันเพื่อเปรียบเทียบการเปลี่ยนแปลง
+            originalOrgName = orgData.name;
+            originalTelegramToken = orgData.telegramToken;
+            originalLocation = `Lat: ${orgData.location.latitude}, Lng: ${orgData.location.longitude}`;
+      
       // แสดงข้อมูลในฟอร์ม
       document.getElementById("editOrgName").value = orgData.name;
       document.getElementById("editTelegramToken").value = orgData.telegramToken;
 
-      // ตรวจสอบว่า location มีข้อมูลหรือไม่
+      // แสดงข้อมูลตำแหน่งเดิม
       if (orgData.location && orgData.location.latitude && orgData.location.longitude) {
         const lat = orgData.location.latitude;
         const lng = orgData.location.longitude;
-        document.getElementById("editLocation").value = `Lat: ${lat}, Lng: ${lng}`;  // แสดงข้อมูลตำแหน่ง
+        document.getElementById("editLocation").value = `Lat: ${lat}, Lng: ${lng}`;
       } else {
-        document.getElementById("editLocation").value = "ไม่พบข้อมูลตำแหน่ง";  // ถ้าไม่มีข้อมูล location
+        document.getElementById("editLocation").value = "ไม่พบข้อมูลตำแหน่ง";
       }
 
-      // ปรับข้อความของปุ่มให้เป็น "อัปเดต"
-      document.getElementById("updateOrgBtn").textContent = "อัปเดต";
+      // ตั้งค่าตำแหน่งใหม่ในฟอร์ม
+      if (selectedLatLng) {
+        const newLat = selectedLatLng.lat();
+        const newLng = selectedLatLng.lng();
+        document.getElementById("newLocation").value = `Lat: ${newLat}, Lng: ${newLng}`;
+      } else {
+        document.getElementById("newLocation").value = null ;
+      }
 
       // ตั้งค่าให้เรียกฟังก์ชัน updateOrganization เมื่อกดปุ่ม "อัปเดต"
       document.getElementById("updateOrgBtn").onclick = function() {
@@ -254,10 +263,10 @@ async function editOrganization(orgId) {
 
 
 
-// ฟังก์ชันสำหรับอัปเดตข้อมูลหน่วยงาน
 async function updateOrganization(orgId) {
   const orgName = document.getElementById("editOrgName").value.trim();
   const telegramToken = document.getElementById("editTelegramToken").value.trim();
+  const newLocation = document.getElementById("newLocation").value.trim(); // ค่าที่ผู้ใช้กรอกหรือเลือก
 
   if (!orgName || !telegramToken) {
     alert("กรุณากรอกข้อมูลให้ครบถ้วน");
@@ -265,27 +274,51 @@ async function updateOrganization(orgId) {
   }
 
   try {
-    // ดึงข้อมูลตำแหน่งจากฟอร์ม
-    const location = document.getElementById("editLocation").value.trim().split(",");
-    const latitude = parseFloat(location[0].replace("Lat:", "").trim());
-    const longitude = parseFloat(location[1].replace("Lng:", "").trim());
-
     const db = firebase.firestore();
     const orgRef = db.collection("organizations").doc(orgId);
 
-    // อัปเดตข้อมูลใน Firestore
-    await orgRef.update({
-      name: orgName,
-      telegramToken: telegramToken,
-      location: new firebase.firestore.GeoPoint(latitude, longitude),
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    });
+    // สร้างตัวแปรที่ใช้ในการอัปเดตข้อมูล
+    let updatedData = {};
 
-    alert("ข้อมูลหน่วยงานอัปเดตเรียบร้อยแล้ว");
-    
+    // ตรวจสอบว่า orgName มีการเปลี่ยนแปลง
+    if (orgName !== originalOrgName) {
+      updatedData.name = orgName;  // ถ้ามีการเปลี่ยนแปลง ชื่อหน่วยงาน
+    }
+
+    // ตรวจสอบว่า telegramToken มีการเปลี่ยนแปลง
+    if (telegramToken !== originalTelegramToken) {
+      updatedData.telegramToken = telegramToken;  // ถ้ามีการเปลี่ยนแปลง Token
+    }
+
+    // ตรวจสอบว่า location มีการเปลี่ยนแปลง
+    if (newLocation && newLocation !== "คลิกแผนที่เพื่อเลือกตำแหน่ง" && newLocation !== originalLocation) {  // ถ้ามีการกรอกตำแหน่งใหม่
+      const location = newLocation.split(",");
+      if (location.length === 2) {
+        const latitude = parseFloat(location[0].replace("Lat:", "").trim());
+        const longitude = parseFloat(location[1].replace("Lng:", "").trim());
+        updatedData.location = new firebase.firestore.GeoPoint(latitude, longitude);  // ถ้ามีการเปลี่ยนแปลง ตำแหน่ง
+      } else {
+        alert("ตำแหน่งไม่ถูกต้อง");
+        return;
+      }
+    } else if (selectedLatLng) {  // ถ้ามีการคลิกตำแหน่งใหม่บนแผนที่
+      const latitude = selectedLatLng.lat();
+      const longitude = selectedLatLng.lng();
+      updatedData.location = new firebase.firestore.GeoPoint(latitude, longitude);  // อัปเดตตำแหน่งใหม่
+    }
+
+    // อัปเดตเฉพาะฟิลด์ที่เปลี่ยนแปลง
+    if (Object.keys(updatedData).length > 0) {
+      updatedData.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+      await orgRef.update(updatedData);  // อัปเดตข้อมูลที่ถูกเปลี่ยนแปลง
+      alert("ข้อมูลหน่วยงานอัปเดตเรียบร้อยแล้ว");
+    } else {
+      alert("ไม่มีการเปลี่ยนแปลงข้อมูล");
+    }
+
     // ปิด Modal
     $('#editOrgModal').modal('hide');
-    
+
     // รีเฟรชข้อมูลหน่วยงาน
     fetchOrganizations(); // ฟังก์ชันดึงข้อมูลหน่วยงานใหม่จาก Firestore
 
@@ -323,6 +356,18 @@ async function deleteOrganization(orgId) {
     alert("เกิดข้อผิดพลาดในการลบหน่วยงาน");
   }
 }
+
+// ฟังก์ชันที่ใช้จับตำแหน่งที่คลิกบนแผนที่
+function handleMapClick(event) {
+  const lat = event.latLng.lat();
+  const lng = event.latLng.lng();
+
+  // อัปเดตตำแหน่งใหม่ในฟอร์ม
+  document.getElementById("newLocation").value = `Lat: ${lat}, Lng: ${lng}`;
+  selectedLatLng = event.latLng;  // เก็บค่าพิกัดเพื่อใช้ในการบันทึก
+}
+
+
 
 // ฟังก์ชันรีเซ็ตฟอร์ม
 function resetForm() {

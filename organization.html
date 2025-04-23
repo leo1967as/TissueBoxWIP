@@ -32,10 +32,10 @@
             <a class="nav-link" href="index.html">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" href="delivery.html">Delivery</a>
+            <a class="nav-link active" href="organization.html">Organization</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="organization.html">Organization</a>
+            <a class="nav-link " href="delivery.html">Delivery</a>
           </li>
         </ul>
       </div>
@@ -44,13 +44,12 @@
   <!-- End Navbar -->
 
   <!-- Main Content -->
-  <div class="container-fluid mt-4">
+  <div class="container-fluid mt-2">
     <div id="map"></div>
-    <div id="clicked-coord" class="form-control bg-light">📍 คลิกบนแผนที่เพื่อเพิ่มตำแหน่ง</div>
   </div>
 
   <div class="container-fluid mt-4 whitebg">
-    <div class="container-fluid mt-4">
+    <div class="container-fluid mb-4 mt-2">
       <div class="d-flex align-items-center" style="margin-bottom: 20px;">
         <!-- ช่องค้นหาหน่วยงาน -->
 <!-- ช่องค้นหาหน่วยงาน -->
@@ -133,9 +132,14 @@
             <input type="text" class="form-control" id="editTelegramToken" required>
           </div>
           <div class="mb-3">
-            <label for="editLocation" class="form-label">ตำแหน่ง</label>
+            <label for="editLocation" class="form-label">ตำแหน่งเดิม</label>
             <input type="text" class="form-control" id="editLocation" disabled>
           </div>
+          <div class="mb-3">
+            <label for="newLocation" class="form-label">ตำแหน่งใหม่</label>
+            <input type="text" class="form-control" id="newLocation" placeholder="คลิกบนแผนที่เพื่อเลือกตำแหน่งใหม่">
+          </div>
+          
         </form>
       </div>
       <div class="modal-footer">
@@ -145,9 +149,6 @@
     </div>
   </div>
 </div>
-
-  
-  
 
   <!-- External Scripts -->
   <script src="js/utils/loading.js"></script>

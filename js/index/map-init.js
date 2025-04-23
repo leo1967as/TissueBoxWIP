@@ -29,6 +29,10 @@ window.initMap = function () {
           position: userLocation,
           map: map,
           title: "ตำแหน่งของคุณ",
+          icon: {
+            url: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+            scaledSize: new google.maps.Size(40, 40)
+          }
         });
 
         loadBoxList();
@@ -45,6 +49,11 @@ window.initMap = function () {
         map = new google.maps.Map(document.getElementById("map"), {
           center: defaultLocation,
           zoom: 12,
+          title: "ตำแหน่งของคุณ",
+          icon: {
+            url: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+            scaledSize: new google.maps.Size(40, 40)
+          }
         });
 
         loadBoxList();
@@ -60,6 +69,11 @@ window.initMap = function () {
     map = new google.maps.Map(document.getElementById("map"), {
       center: defaultLocation,
       zoom: 12,
+      title: "ตำแหน่งของคุณ",
+      icon: {
+        url: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+        scaledSize: new google.maps.Size(40, 40)
+      }
     });
 
     loadBoxList();
