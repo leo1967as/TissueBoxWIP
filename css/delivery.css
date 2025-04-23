@@ -1,0 +1,48 @@
+  
+/* การจัดการ Flexbox สำหรับช่องค้นหาและปุ่ม */
+.container-fluid .d-flex {
+    justify-content: space-between; /* จัดวางให้มีพื้นที่ว่างตรงกลาง */
+    align-items: center; /* จัดให้อยู่กึ่งกลางแนวตั้ง */
+  }
+  
+  #searchOrg {
+    width: 40%; /* กำหนดความกว้างของช่องค้นหา */
+    background: #e6e6e6; /* สีพื้นหลังของช่องค้นหา */
+  }
+  
+  button[data-bs-toggle="modal"] {
+    width: auto; /* ปุ่มมีขนาดตามเนื้อหา */
+  }
+
+  
+  #map {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #e9ecef; /* สีพื้นหลังสำหรับ fallback */
+  }
+  
+.whitebg {
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin: auto auto; /* จัดให้อยู่ตรงกลาง */
+  max-width: 2160x; /* กำหนดความกว้างสูงสุด */
+  padding-bottom: 15px;
+  width: 98vw; /* กำหนดความกว้างเริ่มต้น */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .whitebg {
+    max-width: 95%; /* ลดความกว้างสูงสุดสำหรับหน้าจอเล็ก */
+    width: 100%; /* ใช้ความกว้างเต็มจอ */
+    padding: 1rem; /* เพิ่ม padding ให้เหมาะสม */
+  }
+}
+
+
+.addOrgBtn {
+  background-color: #009ef7 !important; /* เปลี่ยนสีพื้นหลัง */
+  border-color: #009ef7 !important; /* เปลี่ยนสีขอบ */
+}

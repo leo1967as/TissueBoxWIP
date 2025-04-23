@@ -1,73 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>📦 ตำแหน่งกล่องทั้งหมด</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous" />  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- External Styles -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous" />
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/navbar.css">
+  <link rel="stylesheet" href="css/delivery.css">
+  <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
-  <link rel="stylesheet" href="css/navbar.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 </head>
+
 <body>
-      <!-- Navbar -->
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="index.html">📦 TissueBox</a>
-          <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNav"
-            aria-controls="navbarNav"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-              <li class="nav-item">
-                <a class="nav-link " href="index.html">Home</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link active "  href="delivery.html">Delivery</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="organization.html">Organization</a>
-              </li>
-            </ul>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">📦 TissueBox</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="delivery.html">Delivery</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="organization.html">Organization</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- End Navbar -->
+
+  <!-- Main Content -->
+  <div class="container-fluid mt-4">
+    <div id="map"></div>
+    <div id="clicked-coord" class="form-control bg-light">📍 คลิกบนแผนที่เพื่อเพิ่มตำแหน่ง</div>
+  </div>
+
+  <div class="container-fluid mt-4 whitebg">
+    <div class="container-fluid mt-4">
+      <div class="d-flex align-items-center" style="margin-bottom: 20px;">
+        <!-- ช่องค้นหาหน่วยงาน -->
+        <input type="text" class="form-control me-3" id="searchOrg" placeholder="   ค้นหา...  ">
+        
+        <!-- ปุ่มเพิ่มหน่วยงาน -->
+        <button type="button" class="btn btn-primary addOrgBtn" data-bs-toggle="modal" data-bs-target="#addOrgModal">
+          + หน่วยงาน
+        </button>
+      </div>
+
+      <div class="table-responsive rounded-3">
+        <table class="table table-bordered table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>#</th>
+              <th>ชื่อหน่วยงาน</th>
+              <th>Telegram Token</th>
+              <th>วันที่สร้าง</th>
+              <th>การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="orgListContainer"> <!-- จัดการแสดงรายการหน่วยงานใน tbody -->
+            <!-- ข้อมูลหน่วยงานจะถูกเพิ่มที่นี่ผ่าน JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal สำหรับเพิ่มหน่วยงาน -->
+    <div class="modal fade" id="addOrgModal" tabindex="-1" aria-labelledby="addOrgModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addOrgModalLabel" >เพิ่มหน่วยงานใหม่</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="addOrgForm">
+              <div class="mb-3">
+                <label for="orgName" class="form-label">ชื่อหน่วยงาน</label>
+                <input type="text" class="form-control" id="orgName" required>
+              </div>
+              <div class="mb-3">
+                <label for="telegramToken" class="form-label">Telegram Token</label>
+                <input type="text" class="form-control" id="telegramToken" required>
+              </div>
+              <div class="mb-3">
+                <label for="location" class="form-label">ตำแหน่ง</label>
+                <input type="text" class="form-control" id="location" disabled>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+            <button type="button" class="btn btn-primary addOrgBtn" id="saveOrgBtn">ยืนยัน</button>
           </div>
         </div>
-      </nav>
-        <!-- End Navbar -->
-         <!-- Main Content -->
-         <div class="container-fluid mt-4">
-         <div id="map"></div>
-         </div>
-<script src="js/utils/loading.js"></script>
-<script src="js/utils/navbar.js"></script>
-<!-- <script src="js/index/script.js"></script> -->
-<script src="js/index/firebase-init.js"></script>
-<script src="js/index/utils.js"></script>
-<script src="js/delivery/map-init.js"></script>
-<script
-  async
-  defer
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDsGCBKGEvufoikZgscLJSxi-wQ28_c9GQ&callback=initMap&libraries=marker&loading=async">
-</script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
-<script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker
-      .register("sw.js")
-      .then((registration) => {
-        console.log("Service Worker registered with scope:", registration.scope);
-      })
-      .catch((error) => {
-        console.error("Service Worker registration failed:", error);
-      });
-  }
-</script>
+      </div>
+    </div>
+  </div>
+
+  
+  
+
+  <!-- External Scripts -->
+  <script src="js/utils/loading.js"></script>
+  <script src="js/utils/navbar.js"></script>
+  <script src="js/index/firebase-init.js"></script>
+  <script src="js/index/utils.js"></script>
+  <script src="js/delivery/map-init.js"></script>
+  <script src="js/delivery/mn_organization.js"></script>
+  <script src="js/delivery/search_sort.js"></script>
+  <!-- Google Maps API --><!-- โหลด jQuery จาก CDN ก่อนที่คุณจะใช้ $ -->
+
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDsGCBKGEvufoikZgscLJSxi-wQ28_c9GQ&callback=initMap&libraries=marker&loading=async"></script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("sw.js")
+        .then((registration) => {
+          console.log("Service Worker registered with scope:", registration.scope);
+        })
+        .catch((error) => {
+          console.error("Service Worker registration failed:", error);
+        });
+    }
+  </script>
 </body>
+
 </html>
