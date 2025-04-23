@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📦 ตำแหน่งกล่องทั้งหมด</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous" />  <link rel="stylesheet" href="css/style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="css/navbar.css">
+</head>
+<body>
+                    <div class="container-fluid mt-4">
+                        <h1>📦 ตำแหน่งกล่องบนแผนที่</h1>
+                        <div id="map"></div>
+                        <div class="form-group mt-3">
+                            <label for="boxNumberInput">📦 เลือกชื่อกล่อง:</label>
+                            <input type="text" id="boxNumberInput" list="boxList" placeholder="ระบุหรือเลือกกล่อง" class="form-control">
+                            <datalist id="boxList"></datalist>
+                            <button class="btn btn-primary mt-2" onclick="loadBoxPath()">🔍 ค้นหากล่อง</button>
+                        </div>
+                        <div id="clicked-coord" class="mt-2">📍 คลิกบนแผนที่เพื่อเพิ่มตำแหน่ง</div>
+                        <button id="confirmAddBtn" onclick="confirmAddLocation()" class="btn btn-success mt-2" style="display:none;">➕ ยืนยันเพิ่มตำแหน่ง</button>
+                    </div>
+
+            
+  
+  <script src="js/navbar.js"></script>
+<script src="js/index/script.js"></script>
+<script src="js/index/firebase-init.js"></script>
+<script src="js/index/utils.js"></script>
+<script src="js/index/marker-utils.js"></script>
+<script src="js/index/add-position.js"></script>
+<script src="js/index/box-handler.js"></script>
+<script src="js/index/map-init.js"></script>
+<script
+  async
+  defer
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDsGCBKGEvufoikZgscLJSxi-wQ28_c9GQ&callback=initMap&libraries=marker&loading=async">
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+body {
+  font-family: "Segoe UI", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f8f9fa;
+  text-align: center; /* ✅ ทำให้องค์ประกอบที่เป็น inline-block ตรงกลาง */
+}
+
+
+#map {
+  height: 50vh; /* Default: 40% of the viewport height */
+  width: 70vw; /* Default: 60% of the viewport width */
+  margin: 1rem auto; /* Center the map horizontally */
+  border: 2px solid #ccc;
+  border-radius: 8px;
+}
+
+/* Make the map bigger on larger screens */
+@media (min-width: 1024px) {
+  #map {
+    height: 60vh; /* Increase height to 50% of the viewport height */
+    width: 80vw; /* Increase width to 70% of the viewport width */
+  }
+}
+
+.form-group {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+#clicked-coord {
+  margin-top: 1rem;
+  color: #2563eb;
+  font-weight: bold;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  min-height: 100vh;
+}
+
+

@@ -1,0 +1,9 @@
+function formatTimestamp(ts) {
+    if (!ts?.toDate) return "-";
+    return ts.toDate().toLocaleString("th-TH", {
+      day: "2-digit", month: "2-digit", year: "numeric",
+      hour: "2-digit", minute: "2-digit"
+    });
+  }
+  
+  
