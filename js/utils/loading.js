@@ -15,8 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
             loadingOverlay.style.opacity = '0';
             setTimeout(function() {
                 loadingOverlay.style.display = 'none';
-            }, 500);
-        }, 500); // ดีเลย์เล็กน้อยเพื่อให้เห็น animation
+            }, 1000);
+        }, 1000); // ดีเลย์เล็กน้อยเพื่อให้เห็น animation
     });
 
     // ฟังก์ชันสำหรับแสดง loading ใหม่เมื่อต้องการ
