@@ -1,6 +1,14 @@
 let map;
+let currentBoxNumber = "";
+let markers = [];
+let polyline = null;
+let pendingLatLng = null;
+
+
 window.initMap = function () {
   // ตรวจสอบว่าเบราว์เซอร์รองรับ Geolocation หรือไม่
+  showLoading('กำลังโหลดแผนที่...');
+
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -25,6 +33,8 @@ window.initMap = function () {
 
         loadBoxList();
         setupMapClick();
+
+        hideLoading();
       },
       (error) => {
         // กรณีที่ผู้ใช้ปฏิเสธการแชร์ตำแหน่งหรือเกิดข้อผิดพลาด
@@ -39,6 +49,8 @@ window.initMap = function () {
 
         loadBoxList();
         setupMapClick();
+
+        hideLoading();
       }
     );
   } else {
@@ -52,6 +64,8 @@ window.initMap = function () {
 
     loadBoxList();
     setupMapClick();
+
+    hideLoading();
   }
 };
 
@@ -60,10 +74,10 @@ function setupMapClick() {
       const lat = event.latLng.lat();
       const lng = event.latLng.lng();
   
-      if (!currentBoxNumber) {
-        alert("❗ กรุณาเลือกกล่องก่อนคลิกแผนที่");
-        return;
-      }
+      // if (!currentBoxNumber) {
+      //   alert("❗ กรุณาเลือกกล่องก่อนคลิกแผนที่");
+      //   return;
+      // }
   
       pendingLatLng = { lat, lng };
   
@@ -72,4 +86,3 @@ function setupMapClick() {
       document.getElementById("confirmAddBtn").style.display = "inline-block";
     });
   }
-  
