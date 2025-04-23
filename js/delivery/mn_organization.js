@@ -4,51 +4,46 @@
  */
 async function saveOrganization() {
   try {
-    // 1. ดึงค่าจากฟอร์ม
+    // ดึงค่าจากฟอร์ม
     const orgName = document.getElementById("orgName").value.trim();
     const telegramToken = document.getElementById("telegramToken").value.trim();
     
-    // 2. ตรวจสอบข้อมูลที่จำเป็น
+    // ตรวจสอบข้อมูลที่จำเป็น
     if (!orgName || !telegramToken || !selectedLatLng) {
       throw new Error("กรุณากรอกข้อมูลให้ครบถ้วนและเลือกตำแหน่งบนแผนที่");
     }
 
-    // 3. ตรวจสอบรูปแบบ Telegram Token (ตัวอย่างตรวจสอบคร่าวๆ)
-    if (!/^\d+:[a-zA-Z0-9_-]+$/.test(telegramToken)) {
-      throw new Error("รูปแบบ Telegram Token ไม่ถูกต้อง");
-    }
-
-    // 4. ตรวจสอบชื่อหน่วยงานซ้ำ
+    // ตรวจสอบชื่อหน่วยงานซ้ำ
     const db = firebase.firestore();
     const orgRef = db.collection("organizations").doc(orgName);
     
     const doc = await orgRef.get();
-    if (doc.exists) {
+    if (doc.exists && !isEditMode) {
       throw new Error(`หน่วยงาน "${orgName}" มีอยู่แล้วในระบบ`);
     }
 
-    // 5. แสดง Loading
+    // แสดง Loading
     showLoading('กำลังบันทึกข้อมูลหน่วยงาน...');
 
-    // 6. บันทึกข้อมูล
+    // บันทึกข้อมูลลง Firestore
     await orgRef.set({
       name: orgName,
       telegramToken: telegramToken,
-      location: new firebase.firestore.GeoPoint(
-        selectedLatLng.lat(), 
-        selectedLatLng.lng()
-      ),
+      location: new firebase.firestore.GeoPoint(selectedLatLng.lat(), selectedLatLng.lng()),
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    // 7. แจ้งเตือนสำเร็จและรีเซ็ตฟอร์ม
+    // แจ้งเตือนสำเร็จและรีเซ็ตฟอร์ม
     showAlert('success', 'บันทึกข้อมูลสำเร็จ', `หน่วยงาน "${orgName}" ถูกเพิ่มเรียบร้อยแล้ว`);
     
-    // 8. ปิด Modal และรีเฟรชข้อมูล
+    // ปิด Modal และรีเฟรชข้อมูล
     $('#addOrgModal').modal('hide');
     resetForm();
     await fetchOrganizations(); // ฟังก์ชันดึงข้อมูลหน่วยงานใหม่
+
+    // รีเซ็ตโหมดการแก้ไข
+    resetEditMode();
     
   } catch (error) {
     console.error("Error saving organization:", error);
@@ -57,6 +52,7 @@ async function saveOrganization() {
     hideLoading();
   }
 }
+
 
 // ฟังก์ชันแสดง Alert แบบสวยงาม
 function showAlert(type, title, message) {
@@ -224,30 +220,29 @@ async function editOrganization(orgId) {
     if (doc.exists) {
       const orgData = doc.data();
 
+      // แสดงข้อมูลในฟอร์ม
+      document.getElementById("editOrgName").value = orgData.name;
+      document.getElementById("editTelegramToken").value = orgData.telegramToken;
+
       // ตรวจสอบว่า location มีข้อมูลหรือไม่
       if (orgData.location && orgData.location.latitude && orgData.location.longitude) {
         const lat = orgData.location.latitude;
         const lng = orgData.location.longitude;
-        document.getElementById("location").value = `Lat: ${lat}, Lng: ${lng}`;  // แสดงข้อมูลในฟอร์ม
+        document.getElementById("editLocation").value = `Lat: ${lat}, Lng: ${lng}`;  // แสดงข้อมูลตำแหน่ง
       } else {
-        // ถ้าไม่มีข้อมูล location ให้แสดงข้อความหรือใช้ค่าพื้นฐาน
-        document.getElementById("location").value = "ไม่พบข้อมูลตำแหน่ง";
+        document.getElementById("editLocation").value = "ไม่พบข้อมูลตำแหน่ง";  // ถ้าไม่มีข้อมูล location
       }
 
-      // แสดงข้อมูลในฟอร์ม
-      document.getElementById("orgName").value = orgData.name;
-      document.getElementById("telegramToken").value = orgData.telegramToken;
+      // ปรับข้อความของปุ่มให้เป็น "อัปเดต"
+      document.getElementById("updateOrgBtn").textContent = "อัปเดต";
 
-      // ปรับข้อความของปุ่มให้เป็น "อัปเดต" สำหรับการแก้ไข
-      document.getElementById("saveOrgBtn").textContent = "อัปเดต";
-
-      // ตั้งค่าข้อมูลที่ต้องการแก้ไขใน `saveOrgBtn`
-      document.getElementById("saveOrgBtn").onclick = function() {
+      // ตั้งค่าให้เรียกฟังก์ชัน updateOrganization เมื่อกดปุ่ม "อัปเดต"
+      document.getElementById("updateOrgBtn").onclick = function() {
         updateOrganization(orgId);  // เรียกฟังก์ชัน updateOrganization เมื่อกดปุ่ม "อัปเดต"
       };
 
-      // เปิด Modal
-      $('#addOrgModal').modal('show');
+      // เปิด Modal แก้ไข
+      $('#editOrgModal').modal('show');
     } else {
       alert("ไม่พบข้อมูลหน่วยงานที่ต้องการแก้ไข");
     }
@@ -257,10 +252,12 @@ async function editOrganization(orgId) {
   }
 }
 
+
+
 // ฟังก์ชันสำหรับอัปเดตข้อมูลหน่วยงาน
 async function updateOrganization(orgId) {
-  const orgName = document.getElementById("orgName").value.trim();
-  const telegramToken = document.getElementById("telegramToken").value.trim();
+  const orgName = document.getElementById("editOrgName").value.trim();
+  const telegramToken = document.getElementById("editTelegramToken").value.trim();
 
   if (!orgName || !telegramToken) {
     alert("กรุณากรอกข้อมูลให้ครบถ้วน");
@@ -269,7 +266,7 @@ async function updateOrganization(orgId) {
 
   try {
     // ดึงข้อมูลตำแหน่งจากฟอร์ม
-    const location = document.getElementById("location").value.trim().split(",");
+    const location = document.getElementById("editLocation").value.trim().split(",");
     const latitude = parseFloat(location[0].replace("Lat:", "").trim());
     const longitude = parseFloat(location[1].replace("Lng:", "").trim());
 
@@ -287,7 +284,7 @@ async function updateOrganization(orgId) {
     alert("ข้อมูลหน่วยงานอัปเดตเรียบร้อยแล้ว");
     
     // ปิด Modal
-    $('#addOrgModal').modal('hide');
+    $('#editOrgModal').modal('hide');
     
     // รีเฟรชข้อมูลหน่วยงาน
     fetchOrganizations(); // ฟังก์ชันดึงข้อมูลหน่วยงานใหม่จาก Firestore
@@ -297,6 +294,7 @@ async function updateOrganization(orgId) {
     alert("เกิดข้อผิดพลาดในการอัปเดตข้อมูลหน่วยงาน");
   }
 }
+
 
 
 // ฟังก์ชันสำหรับลบข้อมูลหน่วยงานจาก Firestore
@@ -342,5 +340,15 @@ function resetForm() {
   document.getElementById("clicked-coord").textContent = "📍 คลิกบนแผนที่เพื่อเลือกตำแหน่ง";
 }
 
+
+// ฟังก์ชันรีเซ็ตโหมดการแก้ไข
+function resetEditMode() {
+  isEditMode = false;
+  document.getElementById("saveOrgBtn").textContent = "ยืนยัน"; // เปลี่ยนปุ่มกลับมาเป็น "ยืนยัน"
+  document.getElementById("saveOrgBtn").onclick = saveOrganization; // เปลี่ยนให้เรียกฟังก์ชัน saveOrganization
+}
+
+
 // ฟังก์ชันเริ่มต้นเมื่อหน้าโหลดเสร็จ
 document.addEventListener("DOMContentLoaded", fetchOrganizations);
+

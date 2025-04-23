@@ -53,7 +53,9 @@
     <div class="container-fluid mt-4">
       <div class="d-flex align-items-center" style="margin-bottom: 20px;">
         <!-- ช่องค้นหาหน่วยงาน -->
-        <input type="text" class="form-control me-3" id="searchOrg" placeholder="   ค้นหา...  ">
+<!-- ช่องค้นหาหน่วยงาน -->
+<input type="text" class="form-control me-3" id="searchOrg" placeholder="   ค้นหา... " oninput="searchOrganizations()">
+
         
         <!-- ปุ่มเพิ่มหน่วยงาน -->
         <button type="button" class="btn btn-primary addOrgBtn" data-bs-toggle="modal" data-bs-target="#addOrgModal">
@@ -105,12 +107,44 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
-            <button type="button" class="btn btn-primary addOrgBtn" id="saveOrgBtn">ยืนยัน</button>
+            <button type="button" class="btn btn-primary" id="saveOrgBtn">ยืนยัน</button>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Modal สำหรับแก้ไขหน่วยงาน -->
+<div class="modal fade" id="editOrgModal" tabindex="-1" aria-labelledby="editOrgModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editOrgModalLabel">แก้ไขหน่วยงาน</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editOrgForm">
+          <div class="mb-3">
+            <label for="editOrgName" class="form-label">ชื่อหน่วยงาน</label>
+            <input type="text" class="form-control" id="editOrgName" required>
+          </div>
+          <div class="mb-3">
+            <label for="editTelegramToken" class="form-label">Telegram Token</label>
+            <input type="text" class="form-control" id="editTelegramToken" required>
+          </div>
+          <div class="mb-3">
+            <label for="editLocation" class="form-label">ตำแหน่ง</label>
+            <input type="text" class="form-control" id="editLocation" disabled>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+        <button type="button" class="btn btn-primary" id="updateOrgBtn">อัปเดต</button>
+      </div>
+    </div>
+  </div>
+</div>
 
   
   

@@ -30,3 +30,26 @@ function sortTableByColumn(columnIndex) {
 document.querySelectorAll('#orgListContainer th').forEach((th, index) => {
   th.addEventListener('click', () => sortTableByColumn(index)); // เมื่อคลิกที่หัวตาราง ให้เรียงลำดับข้อมูลในคอลัมน์
 });
+
+
+
+// ฟังก์ชันค้นหาหน่วยงานจากชื่อหน่วยงานและ Telegram Token
+function searchOrganizations() {
+  const searchTerm = document.getElementById("searchOrg").value.toLowerCase();  // คำค้นจากช่องค้นหา
+  const orgListContainer = document.getElementById("orgListContainer");  // ตัวแสดงผลรายการหน่วยงานในตาราง
+  const orgItems = orgListContainer.getElementsByTagName("tr");  // ดึงแถวทั้งหมดในตาราง
+
+  // วนลูปผ่านแถวทั้งหมดในตาราง
+  for (let i = 0; i < orgItems.length; i++) {
+    const orgItem = orgItems[i];
+    const orgName = orgItem.getElementsByTagName("td")[1].textContent.toLowerCase();  // ชื่อหน่วยงานในแต่ละแถว
+    const telegramToken = orgItem.getElementsByTagName("td")[2].textContent.toLowerCase();  // Telegram Token ในแต่ละแถว
+
+    // ตรวจสอบว่า คำค้นพบกับชื่อหน่วยงานหรือ Telegram Token หรือไม่
+    if (orgName.includes(searchTerm) || telegramToken.includes(searchTerm)) {
+      orgItem.style.display = "";  // แสดงแถวที่ค้นหาเจอ
+    } else {
+      orgItem.style.display = "none";  // ซ่อนแถวที่ไม่ตรงกับคำค้น
+    }
+  }
+}
