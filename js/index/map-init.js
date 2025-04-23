@@ -5,98 +5,78 @@ let polyline = null;
 let pendingLatLng = null;
 
 
+// ฟังก์ชันแสดง Loading
 window.initMap = function () {
-  // ตรวจสอบว่าเบราว์เซอร์รองรับ Geolocation หรือไม่
   showLoading('กำลังโหลดแผนที่...');
 
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        // ใช้ตำแหน่งของผู้ใช้
-        const userLocation = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
-
-        // สร้างแผนที่โดยใช้ตำแหน่งของผู้ใช้
-        map = new google.maps.Map(document.getElementById("map"), {
-          center: userLocation,
-          zoom: 12,
-        });
-
-        // เพิ่ม Marker ที่ตำแหน่งของผู้ใช้
-        new google.maps.Marker({
-          position: userLocation,
-          map: map,
-          title: "ตำแหน่งของคุณ",
-          icon: {
-            url: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
-            scaledSize: new google.maps.Size(40, 40)
-          }
-        });
-
-        loadBoxList();
-        setupMapClick();
-
-        hideLoading();
-      },
-      (error) => {
-        // กรณีที่ผู้ใช้ปฏิเสธการแชร์ตำแหน่งหรือเกิดข้อผิดพลาด
-        console.error("ไม่สามารถดึงตำแหน่งผู้ใช้ได้:", error);
-
-        // ใช้ตำแหน่งเริ่มต้นแทน
-        const defaultLocation = { lat: 17.3, lng: 103.75 };
-        map = new google.maps.Map(document.getElementById("map"), {
-          center: defaultLocation,
-          zoom: 12,
-          title: "ตำแหน่งของคุณ",
-          icon: {
-            url: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
-            scaledSize: new google.maps.Size(40, 40)
-          }
-        });
-
-        loadBoxList();
-        setupMapClick();
-
-        hideLoading();
-      }
-    );
+  // ตรวจสอบว่าเคยเก็บตำแหน่งแผนที่หรือไม่
+  const savedLocation = localStorage.getItem('mapCenter');
+  
+  if (savedLocation) {
+    // ใช้ตำแหน่งที่เก็บไว้
+    const userLocation = JSON.parse(savedLocation);
+    initMapWithLocation(userLocation);
   } else {
-    // กรณีที่เบราว์เซอร์ไม่รองรับ Geolocation
-    alert("เบราว์เซอร์ของคุณไม่รองรับ Geolocation");
-    const defaultLocation = { lat: 17.3, lng: 103.75 };
-    map = new google.maps.Map(document.getElementById("map"), {
-      center: defaultLocation,
-      zoom: 12,
-      title: "ตำแหน่งของคุณ",
-      icon: {
-        url: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
-        scaledSize: new google.maps.Size(40, 40)
-      }
-    });
-
-    loadBoxList();
-    setupMapClick();
-
-    hideLoading();
+    // ถ้าไม่มีข้อมูลตำแหน่งเก็บไว้ ให้ใช้ตำแหน่งปัจจุบันของผู้ใช้
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const userLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          initMapWithLocation(userLocation);
+        },
+        (error) => {
+          console.error("ไม่สามารถดึงตำแหน่งผู้ใช้ได้:", error);
+          const defaultLocation = { lat: 17.3, lng: 103.75 };
+          initMapWithLocation(defaultLocation);
+        }
+      );
+    } else {
+      alert("เบราว์เซอร์ของคุณไม่รองรับ Geolocation");
+      const defaultLocation = { lat: 17.3, lng: 103.75 };
+      initMapWithLocation(defaultLocation);
+    }
   }
 };
 
+function initMapWithLocation(location) {
+  // สร้างแผนที่ที่ตำแหน่งที่ให้
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: location,
+    zoom: 12,
+  });
+
+  // เพิ่ม Marker
+  new google.maps.Marker({
+    position: location,
+    map: map,
+    title: "ตำแหน่งของคุณ",
+    icon: {
+      url: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+      scaledSize: new google.maps.Size(40, 40),
+    },
+      animation: google.maps.Animation.DROP
+  });
+
+  loadBoxList();
+  setupMapClick();
+
+  hideLoading();
+
+  // เก็บตำแหน่งแผนที่ลงใน localStorage
+  localStorage.setItem('mapCenter', JSON.stringify(location));
+}
+
 function setupMapClick() {
-    map.addListener("click", (event) => {
-      const lat = event.latLng.lat();
-      const lng = event.latLng.lng();
-  
-      // if (!currentBoxNumber) {
-      //   alert("❗ กรุณาเลือกกล่องก่อนคลิกแผนที่");
-      //   return;
-      // }
-  
-      pendingLatLng = { lat, lng };
-  
-      document.getElementById("clicked-coord").textContent =
-        `📍 พิกัดที่คลิก: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-      document.getElementById("confirmAddBtn").style.display = "inline-block";
-    });
-  }
+  map.addListener("click", (event) => {
+    const lat = event.latLng.lat();
+    const lng = event.latLng.lng();
+    
+    pendingLatLng = { lat, lng };
+    document.getElementById("clicked-coord").textContent =
+      `📍 พิกัดที่คลิก: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    document.getElementById("confirmAddBtn").style.display = "inline-block";
+  });
+}

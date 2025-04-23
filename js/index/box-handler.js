@@ -55,7 +55,8 @@ async function loadBoxPath() {
           title: tooltipText, // ✅ Tooltip แสดงเมื่อ hover
           icon: {
             url: `http://maps.google.com/mapfiles/ms/icons/${color}-dot.png`
-          }
+          },
+          animation: google.maps.Animation.DROP
         });
   
         const info = new google.maps.InfoWindow({

@@ -70,6 +70,15 @@ function showAlert(type, title, message) {
   }
 }
 
+function goToLocation(lat, lng) {
+  if (map) {
+    const location = new google.maps.LatLng(lat, lng);
+    map.setCenter(location);
+    map.setZoom(15); // Optional: Adjust the zoom level
+  } else {
+    console.error("Map is not initialized");
+  }
+}
 // ฟังก์ชันรีเซ็ตฟอร์ม
 // ฟังก์ชันที่ใช้ในการแสดงข้อมูลหน่วยงานในตาราง
 async function fetchOrganizations() {
@@ -78,21 +87,31 @@ async function fetchOrganizations() {
     const snapshot = await firebase.firestore().collection("organizations").get();
 
     const orgListContainer = document.getElementById("orgListContainer");
-    orgListContainer.innerHTML = "";  // เคลียร์ข้อมูลที่มีอยู่ก่อน
+    orgListContainer.innerHTML = ""; // เคลียร์ข้อมูลที่มีอยู่ก่อน
 
-    // ใช้ตัวแปร index ในการเพิ่มหมายเลขลำดับ
     let index = 1;
 
-    snapshot.forEach(doc => {
+    snapshot.forEach((doc) => {
       const orgData = doc.data();
-      
+
+      // ตรวจสอบว่ามี location หรือไม่
+      const hasLocation = orgData.location && orgData.location.latitude && orgData.location.longitude;
+
       // สร้างแถวใหม่ในตาราง
       const orgItem = document.createElement("tr");
 
       // เพิ่มข้อมูลลงในแถว
       orgItem.innerHTML = `
-        <td>${index++}</td>  <!-- เพิ่มหมายเลขลำดับ -->
-        <td>${orgData.name}</td>
+        <td>${index++}</td>
+        <td>
+          ${
+            hasLocation
+              ? `<a href="#" class="org-link" onclick="goToLocation(${orgData.location.latitude}, ${orgData.location.longitude})">
+                  ${orgData.name}
+                </a>`
+              : orgData.name
+          }
+        </td>
         <td>${orgData.telegramToken || "undefined"}</td>
         <td>${orgData.createdAt ? orgData.createdAt.toDate().toLocaleString() : "ไม่ระบุ"}</td>
         <td>
@@ -101,10 +120,37 @@ async function fetchOrganizations() {
         </td>
       `;
       orgListContainer.appendChild(orgItem);
+
+        // ตรวจสอบว่ามี location หรือไม่
+  const hasLocations = orgData.location && orgData.location.latitude && orgData.location.longitude;
+
+  if (hasLocation) {
+    // สร้าง Marker
+    const marker = new google.maps.Marker({
+      position: {
+        lat: orgData.location.latitude,
+        lng: orgData.location.longitude,
+      },
+      map: map,
+      title: orgData.name,
+      icon: {
+        url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+        scaledSize: new google.maps.Size(40, 40)
+      },
+      animation: google.maps.Animation.DROP
+    });
+
+    // เพิ่ม Event Listener ให้ Marker (Optional)
+    marker.addListener("click", () => {
+      map.setCenter(marker.getPosition());
+      map.setZoom(15); // ซูมเมื่อคลิก
+    });
+  }
+  
     });
   } catch (error) {
     console.error("Error fetching organizations:", error);
-    showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถดึงข้อมูลหน่วยงานได้');
+    showAlert("error", "เกิดข้อผิดพลาด", "ไม่สามารถดึงข้อมูลหน่วยงานได้");
   }
 }
 

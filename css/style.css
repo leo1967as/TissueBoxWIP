@@ -10,13 +10,6 @@ body {
 }
 
 
-#map {
-  height: 50vh; /* Default: 40% of the viewport height */
-  width: 70vw; /* Default: 60% of the viewport width */
-  margin: 1rem auto; /* Center the map horizontally */
-  border: 2px solid #ccc;
-  border-radius: 8px;
-}
 
 
 /* loading.css */

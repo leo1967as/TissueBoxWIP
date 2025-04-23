@@ -6,7 +6,8 @@ function createMarkerWithColor(position, label, color, title, map) {
       title,
       icon: {
         url: `http://maps.google.com/mapfiles/ms/icons/${color}-dot.png`
-      }
+      },
+      animation: google.maps.Animation.DROP
     });
   }
   
