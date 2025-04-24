@@ -44,11 +44,51 @@
     align-items: center; /* จัดให้อยู่กึ่งกลางแนวตั้ง */
   }
   
-  #searchOrg {
+  #searchOrg  {
     width: 40%; /* กำหนดความกว้างของช่องค้นหา */
     background: #e6e6e6; /* สีพื้นหลังของช่องค้นหา */
+    /* border: none; ลบเส้นขอบ */
+    /* padding: 0; ลบ padding */
+    /* outline: none; ลบเส้นขอบเมื่อคลิก */
   }
   
+  #dateRange {
+    width: 100%; /* กำหนดความกว้างของช่องค้นหา */
+    background: #e6e6e6; /* สีพื้นหลังของช่องค้นหา */
+  }
+
+  /* Calendar */
+  #dateRangeButton {
+    width: 60%; /* กำหนดความกว้างเต็ม */
+    background: #e6e6e6; /* สีพื้นหลัง */
+    border: 1px solid #ccc; /* เส้นขอบ */
+    border-radius: 5px; /* มุมโค้ง */
+    padding: 8px 12px; /* ระยะห่างภายใน */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 5px; /* เพิ่มระยะห่างด้านขวา */;  
+    gap: 8px; /* ระยะห่างระหว่างไอคอนกับข้อความ */
+  }
+  #dropdownMenuButtonSearch {
+    width: 60%; /* กำหนดความกว้างของช่องค้นหา */
+    margin-right: 5px; /* เพิ่มระยะห่างด้านขวา */;
+    /* background: #e6e6e6; สีพื้นหลังของช่องค้นหา */
+  }
+
+  @media (max-width: 576px) {
+    .date-range-text {
+      display: none; /* ซ่อนข้อความ */
+    }
+    #dropdownMenuButtonSearch {
+      width: 50%; /* กำหนดความกว้างของช่องค้นหา */
+      margin-right: 5px; /* เพิ่มระยะห่างด้านขวา */;
+      /* background: #e6e6e6; สีพื้นหลังของช่องค้นหา */
+    }
+
+  }
+
+
   button[data-bs-toggle="modal"] {
     width: auto; /* ปุ่มมีขนาดตามเนื้อหา */
   }

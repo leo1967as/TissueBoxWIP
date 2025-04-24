@@ -12,6 +12,9 @@ async function fetchDeliveries() {
         const data = doc.data();
         const boxId = doc.id; // ใช้ ID ของเอกสารใน Firestore
   
+              // สร้าง timestamp ปัจจุบัน
+      const currentDate = new Date();
+      const currentDateTime = currentDate.toLocaleString('th-TH');
         // สร้างแถวใหม่ในตาราง
         const row = `
           <tr>
@@ -20,7 +23,8 @@ async function fetchDeliveries() {
             <td>${data.senderName}</td>
             <td>${data.status}</td>
             <td>${data.itemList}</td>
-            <td>${data.notes || "-"}</td>
+            <td>${data.notes || "-"}</td> 
+            <td>${data.createdAt ? data.createdAt.toDate().toLocaleString() : "ไม่ระบุ"}</td>
             <td>
               <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editItemModal" onclick="populateEditModal('${boxId}')">แก้ไข</button>
               <button class="btn btn-danger btn-sm" onclick="deleteDelivery('${boxId}')">ลบ</button>
@@ -57,6 +61,7 @@ async function fetchDeliveries() {
             <td>${data.status}</td>
             <td>${data.itemList}</td>
             <td>${data.notes || "-"}</td>
+            <td>${data.createdAt ? data.createdAt.toDate().toLocaleString() : "ไม่ระบุ"}</td>
             <td>
               <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editItemModal" onclick="populateEditModal('${boxId}')">แก้ไข</button>
               <button class="btn btn-danger btn-sm" onclick="deleteDelivery('${boxId}')">ลบ</button>

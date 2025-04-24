@@ -4,8 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>📦 ตำแหน่งกล่องทั้งหมด</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous" />  <link rel="stylesheet" href="css/style.css">
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
   <link rel="stylesheet" href="css/delivery.css">
   <link rel="stylesheet" href="css/navbar.css">
@@ -50,18 +49,33 @@
         <div id="map"></div>
       </div>
      <!-- Main Content -->
-  <div class="container-fluid mt-4 whitebg">
-    <div class="container-fluid mb-4 mt-2">
+  <div class="container-fluid whitebg">
+    <div class="container-fluid">
       <div class="d-flex align-items-center" style="margin-bottom: 20px;">
         <!-- ช่องค้นหาหน่วยงาน -->
-<!-- ช่องค้นหาหน่วยงาน -->
-<input type="text" class="form-control me-3" id="searchOrg" placeholder="   ค้นหา... " oninput="searchOrganizations()">
-
-        
-        <!-- ปุ่มเพิ่มหน่วยงาน -->
-        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#sendItemModal">
-          + ส่งสินค้า
-        </button>
+        <!-- ช่องค้นหาหน่วยงาน -->
+        <input type="text" class="form-control me-3" id="searchOrg" placeholder=" ค้นหา... "
+          oninput="searchOrganizations()">
+        <div class="d-flex align-items-center" style="margin: 0%;">
+          <!-- เลือกช่วงเวลา จากปฎิทิน-->
+          <!-- ปุ่มเลือกช่วงเวลา -->
+          <button class="btn btn-light" id="dateRangeButton">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar"
+              viewBox="0 0 16 16">
+              <path
+                d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1zm1-1h12a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1z" />
+            </svg>
+            <span class="date-range-text">เลือกช่วงเวลา</span>
+          </button>
+          <!-- ช่องค้นหาเป็นหน่วยงาน แบบdropdown-->
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonSearch"
+            data-bs-toggle="dropdown" aria-expanded="false"> เลือกหน่วยงาน </button>
+    
+          <!-- ปุ่มเพิ่มหน่วยงาน -->
+          <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#sendItemModal">
+            + ส่งสินค้า
+          </button>
+        </div>
       </div>
 
       <div class="table-responsive rounded-3">
@@ -76,7 +90,7 @@
               <th>สถานะ</th>
               <th>รายการสิ่งของ</th>
               <th>หมายเหตุ</th>
-              <!-- <th>วันเวลา</th> -->
+              <th>วันเวลา</th>
                 <th>การจัดการ</th>
             </tr>
           </thead>
@@ -190,8 +204,7 @@
   </div>
 </div>
     <!-- End Main Content -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
     <script src="js/utils/loading.js"></script>
     <script src="js/utils/navbar.js"></script>
     <script src="js/delivery/map-init.js"></script>
@@ -203,6 +216,7 @@
 <script src="js/index/utils.js"></script>
 <script src="js/index/marker-utils.js"></script>
 <script src="js/index/add-position.js"></script>
+<script src="js/organization/search_sort.js"></script>
 <script
   async
   defer
