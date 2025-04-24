@@ -1,53 +1,60 @@
-// ฟังก์ชันสำหรับส่งข้อมูลใหม่ (sendItemForm)
-document.getElementById("sendItemForm").addEventListener("submit", async function (event) {
-  event.preventDefault(); // ป้องกันการรีเฟรชหน้า
-  
-  const boxNumber = document.getElementById("boxNumber").value.trim();
-  const senderName = document.getElementById("senderName").value.trim();
-  const fromLocation = document.getElementById("fromLocation").value.trim();
-  const toLocation = document.getElementById("toLocation").value.trim();
-  const status = document.getElementById("status").value;
-  const itemList = document.getElementById("itemList").value.trim();
-  const notes = document.getElementById("notes").value.trim();
+document.addEventListener("DOMContentLoaded", () => {
+  // โหลดข้อมูลองค์กรและตั้งค่า Dropdown
+  loadOrganizations();
 
-  // ตัวอย่าง: แสดงข้อมูลใน Console
-  console.log({
-    boxNumber,
-    senderName,
-    fromLocation,
-    toLocation,
-    status,
-    itemList,
-    notes,
+  // จัดการฟอร์มส่งสินค้า
+  const sendItemForm = document.getElementById("sendItemForm");
+  sendItemForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    // ดึงค่าจากฟอร์ม
+    const boxNumber = document.getElementById("boxNumber")?.value.trim();
+    const senderName = document.getElementById("senderName")?.value.trim();
+    const fromLocation = document.getElementById("fromLocation")?.value.trim();
+    const toLocation = document.getElementById("toLocation")?.value.trim();
+    const itemList = document.getElementById("itemList")?.value.trim();
+    const notes = document.getElementById("notes")?.value.trim();
+
+    try {
+      // ตรวจสอบค่าที่จำเป็น
+      if (!boxNumber) throw new Error("กรุณาระบุเลขกล่อง");
+      if (!fromLocation) throw new Error("กรุณาเลือกสถานที่ต้นทาง");
+      if (!toLocation) throw new Error("กรุณาเลือกสถานที่ปลายทาง");
+
+      const db = firebase.firestore();
+      const docRef = db.collection("deliveries").doc(boxNumber);
+      const docSnap = await docRef.get();
+
+      if (docSnap.exists) throw new Error("เลขกล่องนี้มีอยู่แล้วในระบบ");
+
+      // บันทึกข้อมูล
+      await docRef.set({
+        boxNumber,
+        senderName,
+        fromLocation,
+        toLocation,
+        status: "กำลังจัดส่ง",
+        itemList,
+        notes: notes || "",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+
+      // ปิด Modal
+      const modal = bootstrap.Modal.getOrCreateInstance(
+        document.getElementById("sendItemModal")
+      );
+      modal.hide();
+
+      // รีเซ็ตฟอร์ม
+      sendItemForm.reset();
+      alert("บันทึกข้อมูลสำเร็จ!");
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาด:", error);
+      alert(error.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+    }
   });
-
-  try {
-    const db = firebase.firestore();
-
-    // เพิ่มข้อมูลใหม่ลงใน Firestore
-    await db.collection("deliveries").add({
-      boxNumber: boxNumber,
-      senderName: senderName,
-      fromLocation: fromLocation,
-      toLocation: toLocation,
-      status: status,
-      itemList: itemList,
-      notes: notes,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    });
-
-    // ปิด Modal หลังจากบันทึกสำเร็จ
-    const modal = bootstrap.Modal.getInstance(document.getElementById("sendItemModal"));
-    modal.hide();
-
-    // รีเซ็ตฟอร์ม
-    document.getElementById("sendItemForm").reset();
-    alert("บันทึกข้อมูลสำเร็จ!");
-  } catch (error) {
-    console.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล:", error);
-    alert("ไม่สามารถบันทึกข้อมูลได้ กรุณาลองอีกครั้ง");
-  }
 });
+
   
  // ฟังก์ชันสำหรับแก้ไขข้อมูล (editItemForm)
 document.getElementById("editItemForm").addEventListener("submit", async function (event) {
@@ -83,9 +90,9 @@ document.getElementById("editItemForm").addEventListener("submit", async functio
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
 
-    // ปิด Modal หลังจากบันทึกสำเร็จ
-    const modal = bootstrap.Modal.getInstance(document.getElementById("editItemModal"));
-    modal.hide();
+// แทนการใช้ getOrCreateInstance
+const editModal = new bootstrap.Modal(document.getElementById("editItemModal"));
+editModal.hide();
 
     // รีเซ็ตฟอร์ม
     document.getElementById("editItemForm").reset();

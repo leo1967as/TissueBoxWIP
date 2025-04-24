@@ -1,53 +1,35 @@
-document.getElementById("sendItemForm").addEventListener("submit", async function (event) {
-    event.preventDefault(); // ป้องกันการรีเฟรชหน้า
-  
-    // ดึงค่าจากฟอร์ม
-    const boxNumber = document.getElementById("boxNumber").value.trim();
-    const senderName = document.getElementById("senderName").value.trim();
-    const fromLocation = document.getElementById("fromLocation").value.trim();
-    const toLocation = document.getElementById("toLocation").value.trim();
-    const itemList = document.getElementById("itemList").value.trim();
-    const notes = document.getElementById("notes").value.trim();
-  
-    try {
-      // ตรวจสอบว่า boxNumber ไม่ว่างเปล่า
-      if (!boxNumber) {
-        alert("กรุณาระบุเลขกล่อง");
-        return;
-      }
-  
-      // อ้างอิงไปยัง Firestore
-      const db = firebase.firestore();
-  
-      // ใช้ boxNumber เป็น ID ของเอกสาร
-      await db.collection("deliveries").doc(boxNumber).set({
-        boxNumber: boxNumber,
-        senderName: senderName,
-        fromLocation: fromLocation,
-        toLocation: toLocation,
-        status: "กำลังจัดส่ง", // สถานะเริ่มต้น
-        itemList: itemList,
-        notes: notes,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(), // วันเวลา
-      });
-  
-      // แสดงข้อความสำเร็จ
-      console.log("ข้อมูลถูกบันทึกเรียบร้อยแล้ว");
-  
-      // ปิด Modal หลังจากบันทึกสำเร็จ
-      const modal = new bootstrap.Modal.getInstance(document.getElementById("sendItemModal"));
-      modal.hide();
-  
-      // รีเซ็ตฟอร์ม
-      document.getElementById("sendItemForm").reset();
-    } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล:", error);
-      alert("ไม่สามารถบันทึกข้อมูลได้ กรุณาลองอีกครั้ง");
-    }
-  });
 
-  document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("sendItemForm").addEventListener("submit", async function (event) {
-      // โค้ดของคุณ
+  // DROPDOWNS
+  // โหลดข้อมูลหน่วยงานจาก Firestore และเติมลงใน Dropdowns
+  async function loadOrganizations() {
+  try {
+    const db = firebase.firestore();
+    const snapshot = await db.collection('organizations').get();
+    const orgs = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      orgs.push(data.name); 
     });
-  });
+
+    // เติมข้อมูลลงใน Dropdown ทั้งหมด
+    const selects = document.querySelectorAll('#fromLocation, #toLocation, #editFromLocation, #editToLocation');
+    selects.forEach(select => {
+      // ล้าง options เดิม
+      select.innerHTML = '<option value="" disabled selected>เลือกสถานที่</option>';
+      orgs.forEach(org => {
+        const option = document.createElement('option');
+        option.value = org;
+        option.textContent = org;
+        select.appendChild(option);
+      });
+    });
+  } catch (error) {
+    console.error('Error loading organizations:', error);
+    alert('ไม่สามารถโหลดข้อมูลหน่วยงานได้');
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadOrganizations();
+  listenToDeliveries();
+});

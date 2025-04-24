@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="css/navbar.css">
     <link rel="stylesheet" href="css/style.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 </head>
 <body>
       <!-- Navbar -->
@@ -105,11 +106,15 @@
             </div>
             <div class="mb-3">
               <label for="fromLocation" class="form-label">ส่งจาก</label>
-              <input type="text" class="form-control" id="fromLocation" placeholder="ระบุสถานที่ต้นทาง" required>
+              <select class="form-select" id="fromLocation" required>
+                <option value="" disabled selected>เลือกสถานที่ต้นทาง</option>
+              </select>
             </div>
             <div class="mb-3">
               <label for="toLocation" class="form-label">ไปยัง</label>
-              <input type="text" class="form-control" id="toLocation" placeholder="ระบุสถานที่ปลายทาง" required>
+              <select class="form-select" id="toLocation" required>
+                <option value="" disabled selected>เลือกสถานที่ปลายทาง</option>
+              </select>
             </div>
             <div class="mb-3">
               <label for="itemList" class="form-label">รายการสิ่งของ</label>
@@ -148,11 +153,15 @@
           </div>
           <div class="mb-3">
             <label for="editFromLocation" class="form-label">ส่งจาก</label>
-            <input type="text" class="form-control" id="editFromLocation" placeholder="ระบุสถานที่ต้นทาง" required>
+            <select class="form-select" id="editFromLocation" required>
+              <option value="" disabled selected>เลือกสถานที่ต้นทาง</option>
+            </select>
           </div>
           <div class="mb-3">
             <label for="editToLocation" class="form-label">ไปยัง</label>
-            <input type="text" class="form-control" id="editToLocation" placeholder="ระบุสถานที่ปลายทาง" required>
+            <select class="form-select" id="editToLocation" required>
+              <option value="" disabled selected>เลือกสถานที่ปลายทาง</option>
+            </select>
           </div>
           <div class="mb-3">
             <label for="editStatus" class="form-label">สถานะ</label>
@@ -181,23 +190,24 @@
   </div>
 </div>
     <!-- End Main Content -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+
     <script src="js/utils/loading.js"></script>
     <script src="js/utils/navbar.js"></script>
     <script src="js/delivery/map-init.js"></script>
 <!-- <script src="js/index/script.js"></script> -->
 <script src="js/index/firebase-init.js"></script>
 <script src="js/delivery/box-handler.js"></script>
-<script src="js/index/utils.js"></script>
 <script src="js/delivery/sendData.js"></script>
+<script src="js/delivery/tablehandler.js"></script>
+<script src="js/index/utils.js"></script>
 <script src="js/index/marker-utils.js"></script>
 <script src="js/index/add-position.js"></script>
-<script src="js/delivery/tablehandler.js"></script>
 <script
   async
   defer
   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDsGCBKGEvufoikZgscLJSxi-wQ28_c9GQ&callback=initMap&libraries=marker&loading=async">
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker
