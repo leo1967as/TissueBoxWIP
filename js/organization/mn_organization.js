@@ -415,20 +415,24 @@ function handleMapClick(event) {
 
 
 
-// ฟังก์ชันรีเซ็ตฟอร์ม
 function resetForm() {
   // ล้างค่าในฟอร์ม
-  document.getElementById("orgName").value = "";
-  document.getElementById("telegramToken").value = "";
-  
-  // รีเซ็ตค่าตำแหน่ง
-  document.getElementById("location").value = "คลิกบนแผนที่เพื่อเลือกตำแหน่ง";
+  const orgNameInput = document.getElementById("orgName");
+  const telegramTokenInput = document.getElementById("telegramToken");
+  const locationInput = document.getElementById("location");
+  const clickedCoordDisplay = document.getElementById("clicked-coord");
+
+  if (orgNameInput) orgNameInput.value = "";
+  if (telegramTokenInput) telegramTokenInput.value = "";
+  if (locationInput) locationInput.value = "คลิกบนแผนที่เพื่อเลือกตำแหน่ง";
   
   // รีเซ็ตตัวแปรตำแหน่ง
   selectedLatLng = null;
 
-  // หากคุณใช้ฟังก์ชันแสดงตำแหน่ง, ให้รีเซ็ตข้อความตำแหน่ง
-  document.getElementById("clicked-coord").textContent = "📍 คลิกบนแผนที่เพื่อเลือกตำแหน่ง";
+  // หากมีองค์ประกอบสำหรับแสดงตำแหน่ง ให้รีเซ็ตข้อความ
+  if (clickedCoordDisplay) {
+    clickedCoordDisplay.textContent = "📍 คลิกบนแผนที่เพื่อเลือกตำแหน่ง";
+  }
 }
 
 

@@ -68,9 +68,20 @@
             <span class="date-range-text">เลือกช่วงเวลา</span>
           </button>
           <!-- ช่องค้นหาเป็นหน่วยงาน แบบdropdown-->
-          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonSearch"
-            data-bs-toggle="dropdown" aria-expanded="false"> เลือกหน่วยงาน </button>
-    
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonSearch" data-bs-toggle="dropdown" aria-expanded="false">
+              <span class="dropdown-text HLEO" style="color: black;">เลือกหน่วยงาน</span>
+              <svg class="dropdown-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="black" viewBox="0 0 16 16">
+                <path d="M6 0a2 2 0 0 0-2 2v13H2a1 1 0 0 0-1 1v1h12v-1a1 1 0 0 0-1-1h-2V2a2 2 0 0 0-2-2H6zm1 2h2v2H7V2zM4 2h2v2H4V2zm0 4h2v2H4V6zm3 0h2v2H7V6zm-3 4h2v2H4v-2zm3 0h2v2H7v-2zm-3 4h2v2H4v-2zm3 0h2v2H7v-2zm3-10h2v10h-2V2z"/>
+              </svg>
+            </button>
+            <ul class="dropdown-menu" id="organizationDropdown" aria-labelledby="dropdownMenuButtonSearch">
+              <li><a class="dropdown-item" href="#" data-filter="all">ทั้งหมด</a></li>
+              <!-- รายการองค์กรจะถูกเพิ่มที่นี่ด้วย JavaScript -->
+            </ul>
+          </div>
+
+
           <!-- ปุ่มเพิ่มหน่วยงาน -->
           <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#sendItemModal">
             + ส่งสินค้า
@@ -85,13 +96,13 @@
               <th>#</th>
               <th>เลขกล่อง</th>
               <th>ชื่อผู้ส่ง</th>
-              <!-- <th>ส่งจาก</th> -->
-              <!-- <th>ไปยัง</th> -->
               <th>สถานะ</th>
               <th>รายการสิ่งของ</th>
               <th>หมายเหตุ</th>
               <th>วันเวลา</th>
-                <th>การจัดการ</th>
+              <th>การจัดการ</th>
+              <th>ส่งจาก</th>
+              <th>ไปยัง</th>
             </tr>
           </thead>
           <tbody id="orgListContainer"> <!-- จัดการแสดงรายการหน่วยงานใน tbody -->
@@ -203,6 +214,34 @@
     </div>
   </div>
 </div>
+
+<!-- Modal สำหรับเลือกช่วงเวลา -->
+<div class="modal fade" id="dateRangeModal" tabindex="-1" aria-labelledby="dateRangeModalLabel">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="dateRangeModalLabel">🗓️ เลือกช่วงเวลา</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="dateRangeForm">
+          <div class="mb-3">
+            <label for="startDate" class="form-label">วันที่เริ่มต้น</label>
+            <input type="date" class="form-control" id="startDate">
+          </div>
+          <div class="mb-3">
+            <label for="endDate" class="form-label">วันที่สิ้นสุด</label>
+            <input type="date" class="form-control" id="endDate">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="clearDateFilter()">ล้างตัวกรอง</button>
+        <button type="button" class="btn btn-primary" onclick="applyDateFilter()">ตกลง</button>
+      </div>
+    </div>
+  </div>
+</div>
     <!-- End Main Content -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
     <script src="js/utils/loading.js"></script>
@@ -217,6 +256,7 @@
 <script src="js/index/marker-utils.js"></script>
 <script src="js/index/add-position.js"></script>
 <script src="js/organization/search_sort.js"></script>
+<script src="js/delivery/filter-handler.js"></script>
 <script
   async
   defer

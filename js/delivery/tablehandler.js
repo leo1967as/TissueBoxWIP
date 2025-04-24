@@ -18,18 +18,21 @@ async function fetchDeliveries() {
         // สร้างแถวใหม่ในตาราง
         const row = `
           <tr>
-            <td>${index++}</td>
-            <td>${data.boxNumber}</td>
-            <td>${data.senderName}</td>
-            <td>${data.status}</td>
-            <td>${data.itemList}</td>
-            <td>${data.notes || "-"}</td> 
+          <td>${index++}</td>
+          <td>${data.boxNumber || "-"}</td>
+          <td>${data.senderName || "-"}</td>
+          <td>${data.itemList || "-"}</td>
+          <td>${data.itemList || "-"}</td>
+          <td>${data.notes || "-"}</td>
             <td>${data.createdAt ? data.createdAt.toDate().toLocaleString() : "ไม่ระบุ"}</td>
             <td>
               <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editItemModal" onclick="populateEditModal('${boxId}')">แก้ไข</button>
               <button class="btn btn-danger btn-sm" onclick="deleteDelivery('${boxId}')">ลบ</button>
             </td>
+                              <td>${data.fromLocation || "-"}</td>
+          <td>${data.toLocation || "-"}</td>
           </tr>
+
         `;
         orgListContainer.innerHTML += row;
       });
@@ -55,18 +58,21 @@ async function fetchDeliveries() {
         // สร้างแถวใหม่ในตาราง
         const row = `
           <tr>
-            <td>${index++}</td>
-            <td>${data.boxNumber}</td>
-            <td>${data.senderName}</td>
-            <td>${data.status}</td>
-            <td>${data.itemList}</td>
-            <td>${data.notes || "-"}</td>
+          <td>${index++}</td>
+          <td>${data.boxNumber || "-"}</td>
+          <td>${data.senderName || "-"}</td>
+          <td>${data.itemList || "-"}</td>
+          <td>${data.itemList || "-"}</td>
+          <td>${data.notes || "-"}</td>
             <td>${data.createdAt ? data.createdAt.toDate().toLocaleString() : "ไม่ระบุ"}</td>
             <td>
               <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editItemModal" onclick="populateEditModal('${boxId}')">แก้ไข</button>
               <button class="btn btn-danger btn-sm" onclick="deleteDelivery('${boxId}')">ลบ</button>
             </td>
+                              <td>${data.fromLocation || "-"}</td>
+          <td>${data.toLocation || "-"}</td>
           </tr>
+
         `;
         orgListContainer.innerHTML += row;
       });
