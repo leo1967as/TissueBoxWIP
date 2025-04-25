@@ -182,56 +182,63 @@ function clearDateFilter() {
 // ใช้ตัวกรองทั้งหมด (ทั้งองค์กรและช่วงเวลา)
 // ใช้ตัวกรองทั้งหมด (ทั้งองค์กรและช่วงเวลา)
 function applyFilters() {
-    console.log(`Applying filters - Organization: ${currentOrgFilter}, Date range: ${currentStartDate} to ${currentEndDate}`);
-  
-    const rows = document.querySelectorAll('#orgListContainer tr');
-    let filteredCount = 0;
-    let totalRows = rows.length;
-  
-    rows.forEach(row => {
-      let showRow = true;
-  
-      // กรองตามองค์กร
-      if (currentOrgFilter !== 'all') {
-        const fromLocationCell = row.cells[8]; // คอลัมน์ "ส่งจาก"
-        if (fromLocationCell) {
-          const fromText = fromLocationCell.textContent.trim();
-          if (fromText.toLowerCase() !== currentOrgFilter.toLowerCase()) {
-            showRow = false;
-          }
+  console.log(`Applying filters - Organization: ${currentOrgFilter}, Date range: ${currentStartDate} to ${currentEndDate}`);
+
+  const rows = document.querySelectorAll('#orgListContainer tr');
+  let filteredCount = 0;
+  let index = 1; // เริ่มต้นลำดับที่ 1
+
+  rows.forEach(row => {
+    let showRow = true;
+
+    // กรองตามองค์กร
+    if (currentOrgFilter !== 'all') {
+      const fromLocationCell = row.cells[7]; // คอลัมน์ "ส่งจาก"
+      if (fromLocationCell) {
+        const fromText = fromLocationCell.textContent.trim();
+        if (fromText.toLowerCase() !== currentOrgFilter.toLowerCase()) {
+          showRow = false;
         }
       }
-  
-      // กรองตามช่วงเวลา
-      if (showRow && currentStartDate && currentEndDate) {
-        const dateCell = row.cells[6]; // คอลัมน์วันที่
-        if (dateCell) {
-          const dateText = dateCell.textContent.trim();
-          if (dateText !== 'ไม่ระบุ') {
-            try {
-              const rowDate = new Date(dateText);
-              const startDate = new Date(currentStartDate);
-              const endDate = new Date(currentEndDate);
-              startDate.setHours(0, 0, 0, 0);
-              endDate.setHours(23, 59, 59, 999);
-              if (isNaN(rowDate) || rowDate < startDate || rowDate > endDate) {
-                showRow = false;
-              }
-            } catch (e) {
-              console.error(`Error parsing date: ${dateText}`, e);
+    }
+
+    // กรองตามช่วงเวลา
+    if (showRow && currentStartDate && currentEndDate) {
+      const dateCell = row.cells[6]; // คอลัมน์วันที่
+      if (dateCell) {
+        const dateText = dateCell.textContent.trim();
+        if (dateText !== 'ไม่ระบุ') {
+          try {
+            const rowDate = new Date(dateText);
+            const startDate = new Date(currentStartDate);
+            const endDate = new Date(currentEndDate);
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setHours(23, 59, 59, 999);
+            if (isNaN(rowDate) || rowDate < startDate || rowDate > endDate) {
               showRow = false;
             }
-          } else {
+          } catch (e) {
+            console.error(`Error parsing date: ${dateText}`, e);
             showRow = false;
           }
+        } else {
+          showRow = false;
         }
       }
-  
-      // แสดงหรือซ่อนแถว
-      row.style.display = showRow ? '' : 'none';
-      if (showRow) filteredCount++;
-      
-    });
+    }
+
+    // แสดงหรือซ่อนแถว
+    if (showRow) {
+      row.style.display = "";
+      row.cells[0].textContent = index++; // อัปเดตลำดับใหม่
+      filteredCount++;
+    } else {
+      row.style.display = "none";
+    }
+  });
+
+  console.log(`Filtered ${filteredCount} rows`);
+}
   
     console.log(`Filtered ${filteredCount} out of ${totalRows} rows`);
     const tbody = document.getElementById('orgListContainer');
@@ -252,7 +259,7 @@ function applyFilters() {
       existingNoData.remove();
     }
   }
-  }
+  
 
 // แทนที่ฟังก์ชัน listenToDeliveries ด้วยฟังก์ชันนี้
 // ต้องเพิ่มในไฟล์ tablehandler.js หรือในไฟล์ที่มีการกำหนดฟังก์ชัน listenToDeliveries
@@ -267,7 +274,7 @@ function enhancedListenToDeliveries() {
     orgListContainer.innerHTML = ""; // เคลียร์ข้อมูลเก่า
 
     let index = 1;
-
+    const formattedDate = data.createdAt ? formatTimestamp(data.createdAt) : "ไม่ระบุ";
     snapshot.forEach((doc) => {
       const data = doc.data();
       const boxId = doc.id;
@@ -282,13 +289,13 @@ function enhancedListenToDeliveries() {
       <td>${data.itemList || "-"}</td>
       <td>${data.itemList || "-"}</td>
       <td>${data.notes || "-"}</td>
-        <td>${data.createdAt ? data.createdAt.toDate().toLocaleString() : "ไม่ระบุ"}</td>
+        <td>${formattedDate}</td>
+        <td>${data.fromLocation || "-"}</td>
+        <td>${data.toLocation || "-"}</td>
         <td>
           <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editItemModal" onclick="populateEditModal('${boxId}')">แก้ไข</button>
           <button class="btn btn-danger btn-sm" onclick="deleteDelivery('${boxId}')">ลบ</button>
         </td>
-                          <td>${data.fromLocation || "-"}</td>
-      <td>${data.toLocation || "-"}</td>
       </tr>
 
     `;

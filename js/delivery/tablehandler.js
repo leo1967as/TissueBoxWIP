@@ -1,7 +1,8 @@
+
 async function fetchDeliveries() {
     try {
       const db = firebase.firestore();
-      const snapshot = await db.collection("deliveries").get();
+      const snapshot = await db.collection("deliveries").orderBy("createdAt").get();
   
       const orgListContainer = document.getElementById("orgListContainer");
       orgListContainer.innerHTML = ""; // เคลียร์ข้อมูลเก่า
@@ -15,22 +16,24 @@ async function fetchDeliveries() {
               // สร้าง timestamp ปัจจุบัน
       const currentDate = new Date();
       const currentDateTime = currentDate.toLocaleString('th-TH');
+      const formattedDate = data.createdAt ? formatTimestamp(data.createdAt) : "ไม่ระบุ";
+
         // สร้างแถวใหม่ในตาราง
         const row = `
           <tr>
           <td>${index++}</td>
           <td>${data.boxNumber || "-"}</td>
           <td>${data.senderName || "-"}</td>
-          <td>${data.itemList || "-"}</td>
+          <td>${data.status || "-"}</td>
           <td>${data.itemList || "-"}</td>
           <td>${data.notes || "-"}</td>
-            <td>${data.createdAt ? data.createdAt.toDate().toLocaleString() : "ไม่ระบุ"}</td>
+                   <td>${formattedDate}</td>
+            <td>${data.fromLocation || "-"}</td>
+            <td>${data.toLocation || "-"}</td>
             <td>
               <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editItemModal" onclick="populateEditModal('${boxId}')">แก้ไข</button>
               <button class="btn btn-danger btn-sm" onclick="deleteDelivery('${boxId}')">ลบ</button>
             </td>
-                              <td>${data.fromLocation || "-"}</td>
-          <td>${data.toLocation || "-"}</td>
           </tr>
 
         `;
@@ -45,7 +48,7 @@ async function fetchDeliveries() {
     const db = firebase.firestore();
   
     // ฟังการเปลี่ยนแปลงในคอลเลกชัน "deliveries"
-    db.collection("deliveries").onSnapshot((snapshot) => {
+    db.collection("deliveries").orderBy("createdAt").onSnapshot((snapshot) => {
       const orgListContainer = document.getElementById("orgListContainer");
       orgListContainer.innerHTML = ""; // เคลียร์ข้อมูลเก่า
   
@@ -54,7 +57,9 @@ async function fetchDeliveries() {
       snapshot.forEach((doc) => {
         const data = doc.data();
         const boxId = doc.id; // ใช้ ID ของเอกสารใน Firestore
-  
+           // ใช้ formatTimestamp เพื่อแสดงวันที่แบบไทย
+           const formattedDate = data.createdAt ? formatTimestamp(data.createdAt) : "ไม่ระบุ";
+
         // สร้างแถวใหม่ในตาราง
         const row = `
           <tr>
@@ -64,13 +69,13 @@ async function fetchDeliveries() {
           <td>${data.itemList || "-"}</td>
           <td>${data.itemList || "-"}</td>
           <td>${data.notes || "-"}</td>
-            <td>${data.createdAt ? data.createdAt.toDate().toLocaleString() : "ไม่ระบุ"}</td>
+                    <td>${formattedDate}</td>
+            <td>${data.fromLocation || "-"}</td>
+            <td>${data.toLocation || "-"}</td>
             <td>
               <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editItemModal" onclick="populateEditModal('${boxId}')">แก้ไข</button>
               <button class="btn btn-danger btn-sm" onclick="deleteDelivery('${boxId}')">ลบ</button>
             </td>
-                              <td>${data.fromLocation || "-"}</td>
-          <td>${data.toLocation || "-"}</td>
           </tr>
 
         `;
@@ -83,5 +88,5 @@ async function fetchDeliveries() {
 
   document.addEventListener("DOMContentLoaded", () => {
     listenToDeliveries();
-    fetchDeliveries();
+    fetchDeliveries();  
   });

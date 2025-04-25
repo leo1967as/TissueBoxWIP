@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   // โหลดข้อมูลองค์กรและตั้งค่า Dropdown
   loadOrganizations();
+  sortTableByDate(); // เรียงวันที่ทันทีเมื่อหน้าโหลดเสร็จ
 
   // จัดการฟอร์มส่งสินค้า
   const sendItemForm = document.getElementById("sendItemForm");
