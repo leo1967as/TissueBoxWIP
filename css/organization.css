@@ -55,10 +55,38 @@
 }
 
 
+/* ====================== Modal ====================== */
+.modal-content{    
+  position: relative; 
+  top: 50%; 
+  left: 50%; 
+  transform: translate(-50%, -50%); 
+  width: 90%; 
+  max-width: 500px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.);
+}
 
 
 
 .addOrgBtn {
   background-color: #009ef7 !important; /* เปลี่ยนสีพื้นหลัง */
   border-color: #009ef7 !important; /* เปลี่ยนสีขอบ */
+}
+
+.modal.fade .modal-dialog {
+  /* position: fixed; */
+  top: 50%; /* จัดให้อยู่กึ่งกลางแนวตั้ง */
+  left: 0%; /* จัดให้อยู่กึ่งกลางแนวนอน */
+  animation: fadeInFromTop 0.5s ease; /* ใช้ Animation */
+  width: 90%; /* ความกว้างเริ่มต้น */
+}
+
+@media (max-width: 768px) {
+  .modal.fade .modal-dialog {
+  /* position: fixed; */
+  top: 50%; /* จัดให้อยู่กึ่งกลางแนวตั้ง */
+  left: 3%; /* จัดให้อยู่กึ่งกลางแนวนอน */
+
+}
 }

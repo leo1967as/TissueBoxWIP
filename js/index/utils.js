@@ -7,3 +7,12 @@ function formatTimestamp(ts) {
   }
   
   
+  function highlightInput(inputId, duration = 3100) {
+    const inputField = document.getElementById(inputId);
+    if (inputField) {
+        inputField.classList.add('highlight'); // เพิ่มคลาส highlight
+        setTimeout(() => {
+            inputField.classList.remove('highlight'); // ลบคลาสหลังจากเวลาที่กำหนด
+        }, duration);
+    }
+}

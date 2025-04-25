@@ -9,6 +9,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
   <link rel="stylesheet" href="css/navbar.css">
   <link rel="stylesheet" href="css/index.css">
+  <link rel="stylesheet" href="css/utils/toasts.css">
+  <link rel="stylesheet" href="css/utils/loading.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
@@ -44,22 +46,28 @@
   </nav>
     <!-- End Navbar -->
      <!-- Main Content -->
-    <div class="container-fluid mt-2">
+    <div class="container-fluid ">
         <div id="map"></div>
-        <div class="form-group mt-3">
-            <label for="boxNumberInput">📦 เลือกชื่อกล่อง:</label>
-            <input type="text" id="boxNumberInput" list="boxList" placeholder="ระบุหรือเลือกกล่อง" class="form-control">
+        <div id="dynamicBox" class="form-group mt-3 whitebg">
+            <label for="boxNumberInput" class="mb-3 whitebg">📦 เลือกชื่อกล่อง:</label>
+            <input type="text" id="boxNumberInput" list="boxList" placeholder="ระบุหรือเลือกกล่อง" class="form-control mb-3">
             <datalist id="boxList"></datalist>
             <button class="btn btn-primary mt-2" onclick="loadBoxPath()">🔍 ค้นหากล่อง</button>
         </div>
-        <div id="clicked-coord" class="mt-2">📍 คลิกบนแผนที่เพื่อเพิ่มตำแหน่ง</div>
+        <!-- <div id="clicked-coord" class="mt-2">📍 คลิกบนแผนที่เพื่อเพิ่มตำแหน่ง</div>
         <button id="confirmAddBtn" onclick="confirmAddLocation()" class="btn btn-success mt-2" style="display:none;">➕
-            ยืนยันเพิ่มตำแหน่ง</button>
+            ยืนยันเพิ่มตำแหน่ง</button> -->
     </div>
     <!-- End Main Content -->
+         <!-- Toast  --><!-- แก้ไขตำแหน่งและโครงสร้าง Toast -->
+
+    <!-- End Toast  -->
     <script src="js/utils/loading.js"></script>
     <script src="js/utils/navbar.js"></script>
+    <script src="js/utils/toasts.js"></script>
     <script src="js/index/map-init.js"></script>
+    <script src="js/utils/main.js"></script>
+
 <!-- <script src="js/index/script.js"></script> -->
 <script src="js/index/firebase-init.js"></script>
 <script src="js/index/utils.js"></script>

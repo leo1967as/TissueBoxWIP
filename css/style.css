@@ -66,3 +66,11 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+
+/* ====================== HighLight ====================== */
+.highlight {
+  border: 2px solid #ffc107; /* เส้นขอบสีเหลือง */
+  box-shadow: 0 0 10px #ffc107; /* เงาสีเหลือง */
+  transition: box-shadow 0.3s ease, border 0.3s ease; /* เพิ่มเอฟเฟกต์ */
+}

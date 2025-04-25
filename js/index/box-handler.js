@@ -18,8 +18,10 @@ async function loadBoxPath() {
     currentBoxNumber = boxNumber;
   
     if (!boxNumber) {
-      alert("❗ กรุณากรอกหรือเลือกชื่อกล่อง");
-      return;
+      // Toast สำหรับ Warning
+      showToast('Warning', 'ระบุเลขกล่อง หรือ เลือกกล่อง', 'warning','center');
+      highlightInput('boxNumberInput');
+      return; 
     }
   
     try {
