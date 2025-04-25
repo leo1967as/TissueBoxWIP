@@ -9,8 +9,9 @@
   <link rel="stylesheet" href="css/delivery.css">
   <link rel="stylesheet" href="css/navbar.css">
     <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/utils/qrcode.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
       <!-- Navbar -->
@@ -242,6 +243,28 @@
     </div>
   </div>
 </div>
+
+
+<!-- เพิ่ม Modal สำหรับแสดง QR Code -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="qrCodeModalLabel">📱 QR Code สำหรับพัสดุ</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <div id="qrcode" class="d-flex justify-content-center mb-3"></div>
+        <div id="qrInfo" class="text-muted mb-3 small"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+        <button type="button" class="btn btn-primary" id="downloadQRCode">ดาวน์โหลด QR Code</button>
+        <button type="button" class="btn btn-success" id="printQRCode">พิมพ์ QR Code</button>
+      </div>
+    </div>
+  </div>
+</div>
     <!-- End Main Content -->
 
 
@@ -259,6 +282,7 @@
 <script src="js/index/add-position.js"></script>
 <script src="js/organization/search_sort.js"></script>
 <script src="js/delivery/filter-handler.js"></script>
+<script src="js/qrcode/qrcodegen.js"></script>
 <script
   async
   defer

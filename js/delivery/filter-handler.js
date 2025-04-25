@@ -65,9 +65,7 @@ async function loadOrganizationsForFilter() {
     // เพิ่มรายการองค์กรใน dropdown
     snapshot.forEach(doc => {
       const data = doc.data();
-      console.log(`ดึงข้อมูลจาก Firestore: ${JSON.stringify(data)}`); // ตรวจสอบข้อมูลที่ดึงมา
       if (data.name) { // ตรวจสอบว่ามีฟิลด์ name หรือไม่
-        console.log(`พบ NAME    `); // ตรวจสอบข้อมูลที่ดึงมา
         orgIdToNameMap[doc.id] = data.name; // map ID => ชื่อ
         const li = document.createElement('li');
         const a = document.createElement('a');
@@ -187,7 +185,7 @@ function applyFilters() {
   const rows = document.querySelectorAll('#orgListContainer tr');
   let filteredCount = 0;
   let index = 1; // เริ่มต้นลำดับที่ 1
-
+  const totalRows = rows.length;
   rows.forEach(row => {
     let showRow = true;
 
@@ -238,9 +236,9 @@ function applyFilters() {
   });
 
   console.log(`Filtered ${filteredCount} rows`);
-}
+  console.log(`Filtered ${filteredCount} out of ${totalRows} rows`);
+
   
-    console.log(`Filtered ${filteredCount} out of ${totalRows} rows`);
     const tbody = document.getElementById('orgListContainer');
   const existingNoData = tbody.querySelector('.no-data-row');
   if (filteredCount === 0) {
@@ -260,6 +258,7 @@ function applyFilters() {
     }
   }
   
+}
 
 // แทนที่ฟังก์ชัน listenToDeliveries ด้วยฟังก์ชันนี้
 // ต้องเพิ่มในไฟล์ tablehandler.js หรือในไฟล์ที่มีการกำหนดฟังก์ชัน listenToDeliveries
@@ -274,19 +273,19 @@ function enhancedListenToDeliveries() {
     orgListContainer.innerHTML = ""; // เคลียร์ข้อมูลเก่า
 
     let index = 1;
-    const formattedDate = data.createdAt ? formatTimestamp(data.createdAt) : "ไม่ระบุ";
     snapshot.forEach((doc) => {
       const data = doc.data();
       const boxId = doc.id;
-      const fromLocationName = orgIdToNameMap[data.fromLocation] || data.fromLocation || "-";
-      const toLocationName = orgIdToNameMap[data.toLocation] || data.toLocation || "-";
+
+      const formattedDate = data.createdAt ? formatTimestamp(data.createdAt) : "ไม่ระบุ";
+      
       // สร้างแถวใหม่ในตาราง - แสดงจากและไปยังอย่างชัดเจน
       const row = `
       <tr>
       <td>${index++}</td>
       <td>${data.boxNumber || "-"}</td>
       <td>${data.senderName || "-"}</td>
-      <td>${data.itemList || "-"}</td>
+      <td>${data.status || "-"}</td>
       <td>${data.itemList || "-"}</td>
       <td>${data.notes || "-"}</td>
         <td>${formattedDate}</td>

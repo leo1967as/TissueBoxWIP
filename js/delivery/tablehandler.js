@@ -33,6 +33,7 @@ async function fetchDeliveries() {
             <td>
               <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editItemModal" onclick="populateEditModal('${boxId}')">แก้ไข</button>
               <button class="btn btn-danger btn-sm" onclick="deleteDelivery('${boxId}')">ลบ</button>
+                          <button class="btn btn-info btn-sm" onclick="generateQRCode('${boxId}')">QR Code</button>
             </td>
           </tr>
 
@@ -75,6 +76,7 @@ async function fetchDeliveries() {
             <td>
               <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editItemModal" onclick="populateEditModal('${boxId}')">แก้ไข</button>
               <button class="btn btn-danger btn-sm" onclick="deleteDelivery('${boxId}')">ลบ</button>
+              <button class="btn btn-info btn-sm" onclick="generateQRCode('${boxId}')">QR Code</button>
             </td>
           </tr>
 
@@ -85,6 +87,7 @@ async function fetchDeliveries() {
       console.error("Error listening to deliveries:", error);
     });
   }
+
 
   document.addEventListener("DOMContentLoaded", () => {
     listenToDeliveries();
