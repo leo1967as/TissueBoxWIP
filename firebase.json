@@ -1,0 +1,38 @@
+{
+    "hosting": {
+      "public": "public",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ],
+      "headers": [
+        {
+          "source": "**/*.@(js|css)",
+          "headers": [
+            { "key": "Cache-Control", "value": "public,max-age=31536000,immutable" }
+          ]
+        },
+        {
+          "source": "/index.html",
+          "headers": [
+            { "key": "Cache-Control", "value": "public,max-age=0,must-revalidate" }
+          ]
+        }
+      ],
+      "cleanUrls": true,
+      "trailingSlash": false,
+      "redirects": [
+        { "source": "/index.html",        "destination": "/",             "type": 301 },
+        { "source": "/delivery.html",     "destination": "/delivery",     "type": 301 },
+        { "source": "/organization.html", "destination": "/organization", "type": 301 },
+        { "source": "/update-status.html","destination": "/update-status","type": 301 }
+      ]
+    }
+  }

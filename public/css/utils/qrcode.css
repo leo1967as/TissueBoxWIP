@@ -1,0 +1,47 @@
+/* CSS สำหรับ QR Code */
+#qrcode {
+    padding: 15px;
+    background-color: white;
+    border-radius: 5px;
+    margin: 0 auto;
+  }
+  
+  #qrcode img {
+    display: block;
+    margin: 0 auto;
+  }
+  
+  .qr-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  /* ทำให้ปุ่มในการจัดการมีระยะห่างที่ดีขึ้น */
+  .table td button {
+    margin-right: 3px;
+    margin-bottom: 3px;
+  }
+  
+  /* ทำให้ตารางแสดงผลได้ดีบนมือถือ */
+  @media (max-width: 768px) {
+    .table-responsive {
+      overflow-x: auto;
+    }
+    
+    .table td button {
+      padding: 0.2rem 0.4rem;
+      font-size: 0.75rem;
+    }
+  
+    #qrcode {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto;
+    }
+    
+    #qrcode img {
+      width: 100%;
+      height: auto;
+    }
+  }

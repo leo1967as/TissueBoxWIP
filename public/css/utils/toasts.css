@@ -1,0 +1,66 @@
+/* ====================== Toast Container ====================== */
+.toast-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    width: auto;
+    max-width: 100%;
+    pointer-events: none;
+  }
+  
+  /* ====================== Toast Animation ====================== */
+  @keyframes toastSlideIn {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+  
+  .toast {
+    width: 500px;
+    max-width: 90vw; /* จำกัดความกว้างสูงสุด */
+    margin: 0.5rem;
+    pointer-events: auto;
+    animation: toastSlideIn 0.3s ease-out;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  /* ====================== Responsive Design ====================== */
+  @media (max-width: 768px) {
+    .toast {
+      width: 90vw;
+      font-size: 0.9rem;
+    }
+    
+    .toast-header {
+      font-size: 0.95rem;
+    }
+    
+    .toast-body {
+      font-size: 0.85rem;
+    }
+  }
+
+/* ====================== Responsive Design ====================== */
+@media (max-width: 576px) {
+  .toast {
+    width: 90vw;
+    font-size: 0.9rem;
+  }
+  
+  .toast-header {
+    font-size: 0.95rem;
+  }
+  
+  .toast-body {
+    font-size: 0.85rem;
+  }
+}

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📦 ตำแหน่งกล่องทั้งหมด</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous" />  <link rel="stylesheet" href="css/style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="css/navbar.css">
+  <link rel="stylesheet" href="css/index.css">
+  <link rel="stylesheet" href="css/utils/toasts.css">
+  <link rel="stylesheet" href="css/utils/loading.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+      <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">📦 TissueBox</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+       >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link active" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/organization">Organization</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/delivery">Delivery</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+    <!-- End Navbar -->
+     <!-- Main Content -->
+    <div class="container-fluid ">
+        <div id="map"></div>
+        <div id="dynamicBox" class="form-group mt-3 whitebg">
+            <label for="boxNumberInput" class="mb-3 whitebg">📦 เลือกชื่อกล่อง: จุ๊บเหม่งนุ๋เพง</label>
+            <input type="text" id="boxNumberInput" list="boxList" placeholder="ระบุหรือเลือกกล่อง" class="form-control mb-3">
+            <datalist id="boxList"></datalist>
+            <button class="btn btn-primary mt-2" onclick="loadBoxPath()">🔍 ค้นหากล่อง</button>
+        </div>
+        <div id="clicked-coord" class="mt-2">📍 คลิกบนแผนที่เพื่อเพิ่มตำแหน่ง</div>
+        <button id="confirmAddBtn" onclick="confirmAddLocation()" class="btn btn-success mt-2" style="display:none;">➕
+            ยืนยันเพิ่มตำแหน่ง</button>
+    </div>
+    <!-- End Main Content -->
+         <!-- Toast  --><!-- แก้ไขตำแหน่งและโครงสร้าง Toast -->
+
+    <!-- End Toast  -->
+    <script src="js/utils/loading.js"></script>
+    <script src="js/utils/navbar.js"></script>
+    <script src="js/utils/toasts.js"></script>
+    <script src="js/index/map-init.js"></script>
+    <script src="js/utils/main.js"></script>
+
+<!-- <script src="js/index/script.js"></script> -->
+<script src="js/index/firebase-init.js"></script>
+<script src="js/index/utils.js"></script>
+<script src="js/index/marker-utils.js"></script>
+<script src="js/index/add-position.js"></script>
+<script src="js/index/box-handler.js"></script>
+<script
+  async
+  defer
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDsGCBKGEvufoikZgscLJSxi-wQ28_c9GQ&callback=initMap&libraries=marker&loading=async">
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker
+      .register("sw.js")
+      .then((registration) => {
+        console.log("Service Worker registered with scope:", registration.scope);
+      })
+      .catch((error) => {
+        console.error("Service Worker registration failed:", error);
+      });
+      
+  }
+</script>
+</body>
+</html>

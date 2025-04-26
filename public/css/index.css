@@ -1,0 +1,34 @@
+#map {
+    height: 50vh; /* Default: 40% of the viewport height */
+    width: 100%; /* Default: 60% of the viewport width */
+    margin: 1rem auto; /* Center the map horizontally */
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    background-color: #e9ecef; /* สีพื้นหลังสำหรับ fallback */
+  }
+
+  .whitebg {
+    background-color: #fff;
+    padding: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px; /* ทำขอบโค้ง 8px */
+    max-width: 2160px; /* แก้ไขค่าความกว้างสูงสุด */
+    padding-bottom: 15px;
+  }
+  .d-flex.align-items-center {
+    margin-bottom: 10px; /* ลดระยะห่างด้านล่าง */
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .whitebg {
+
+      max-width: 100%; /* ลดความกว้างสูงสุดสำหรับหน้าจอเล็ก */
+      width: 100%; /* ใช้ความกว้างเต็มจอ */
+      padding: 1rem; /* เพิ่ม padding ให้เหมาะสม */
+    }
+  }
+  
+  #boxNumberInput {
+    background: #e6e6e6; /* สีพื้นหลังของช่องค้นหา */
+  }
