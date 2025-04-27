@@ -20,11 +20,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ฟังก์ชันสำหรับแสดง loading ใหม่เมื่อต้องการ
-    window.showLoading = function(text = 'กำลังโหลดข้อมูล...') {
-        const loadingText = loadingOverlay.querySelector('.loading-text');
-        loadingText.textContent = text;
-        loadingOverlay.style.display = 'flex';
-        loadingOverlay.style.opacity = '1';
+    window.showLoading = function (text = 'กำลังโหลดข้อมูล...') {
+        const loadingText = document.querySelector('.loading-text');
+        if (loadingText) loadingText.textContent = text;
+        const loadingOverlay = document.querySelector('.loading-overlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'flex';
+            loadingOverlay.style.opacity = '1';
+        }
     };
 
     // ฟังก์ชันสำหรับซ่อน loading

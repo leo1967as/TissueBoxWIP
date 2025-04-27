@@ -22,7 +22,7 @@
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-      <a class="navbar-brand" href="index.html">📦 TissueBox</a>
+      <a class="navbar-brand" href="/">📦 TissueBoxxx</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -113,7 +113,7 @@
     </div>
   </div>
 
-  <!-- Modal สำหรับแก้ไขหน่วยงาน -->
+<!-- Modal สำหรับแก้ไขหน่วยงาน -->
 <div class="modal fade" id="editOrgModal" tabindex="-1" aria-labelledby="editOrgModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -133,13 +133,18 @@
           </div>
           <div class="mb-3">
             <label for="editLocation" class="form-label">ตำแหน่งเดิม</label>
-            <input type="text" class="form-control" id="editLocation" disabled>
+            <div class="input-group">
+              <input type="text" class="form-control" id="editLocation" disabled>
+              <button class="btn btn-outline-secondary" type="button" id="viewCurrentLocationBtn">ดูตำแหน่ง</button>
+            </div>
           </div>
           <div class="mb-3">
             <label for="newLocation" class="form-label">ตำแหน่งใหม่</label>
-            <input type="text" class="form-control" id="newLocation" placeholder="คลิกบนแผนที่เพื่อเลือกตำแหน่งใหม่">
+            <div class="input-group">
+              <input type="text" class="form-control" id="newLocation" placeholder="คลิกปุ่มเลือกตำแหน่งใหม่" readonly>
+              <button class="btn btn-outline-primary" type="button" id="selectNewLocationBtn">เลือกตำแหน่งใหม่</button>
+            </div>
           </div>
-          
         </form>
       </div>
       <div class="modal-footer">
@@ -150,34 +155,36 @@
   </div>
 </div>
 
-  <!-- External Scripts -->
-  <script src="js/utils/loading.js"></script>
-  <script src="js/utils/navbar.js"></script>
-  <script src="js/index/firebase-init.js"></script>
-  <script src="js/index/utils.js"></script>
-  <script src="js/organization/map-init.js"></script>
-  <script src="js/organization/mn_organization.js"></script>
-  <script src="js/organization/search_sort.js"></script>
-  <!-- Google Maps API --><!-- โหลด jQuery จาก CDN ก่อนที่คุณจะใช้ $ -->
 
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDsGCBKGEvufoikZgscLJSxi-wQ28_c9GQ&callback=initMap&libraries=marker&loading=async"></script>
+<!-- แถบสถานะการเลือกตำแหน่ง (จะถูกแสดงเมื่อกำลังเลือกตำแหน่ง) -->
+<div id="selectingLocationAlert" class="alert alert-info position-fixed top-0 start-50 translate-middle-x d-none" style="z-index: 1050; margin-top: 60px;">
+  <strong>กำลังเลือกตำแหน่ง:</strong> คลิกบนแผนที่เพื่อเลือกตำแหน่งใหม่ หรือ 
+  <button id="cancelSelectLocationBtn" class="btn btn-sm btn-secondary">ยกเลิก</button>
+</div>
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
 
+
+<!-- เพิ่ม Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+
+<!-- External Scripts -->
+<script src="js/utils/loading.js"></script>
+<script src="js/utils/toasts.js"></script>
+<script src="js/utils/navbar.js"></script>
+<script src="js/index/firebase-init.js"></script>
+<script src="js/index/utils.js"></script>
+
+<!-- Application Scripts -->
+<script src="js/organization/map-init.js"></script>
+<script src="js/organization/mn_organization.js"></script>
+<script src="js/organization/search_sort.js"></script>
+
+<!-- Google Maps API -->
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDsGCBKGEvufoikZgscLJSxi-wQ28_c9GQ&callback=initMap&libraries=marker&loading=async"></script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
   <!-- Service Worker -->
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker
-        .register("sw.js")
-        .then((registration) => {
-          console.log("Service Worker registered with scope:", registration.scope);
-        })
-        .catch((error) => {
-          console.error("Service Worker registration failed:", error);
-        });
-    }
-  </script>
 </body>
 
 </html>
