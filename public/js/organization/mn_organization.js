@@ -41,9 +41,11 @@ function handleMapClick(event) {
   console.log("Map clicked at:", event.latLng.lat(), event.latLng.lng());
   
   // ถ้าอยู่ในโหมดเลือกตำแหน่งสำหรับการแก้ไข ให้ใช้ handleMapClickForEdit แทน
-  if (window.isSelectingLocation) {
+  if (window.isSelectingLocation || isSelectingLocation) {
     if (typeof window.handleMapClickForEdit === 'function') {
       window.handleMapClickForEdit(event);
+    } else if (typeof handleMapClickForEdit === 'function') {
+      handleMapClickForEdit(event);
     }
     return;
   }
@@ -53,12 +55,14 @@ function handleMapClick(event) {
   
   // เก็บตำแหน่งที่เลือก
   window.selectedLatLng = event.latLng;
+  selectedLatLng = event.latLng;
   
   // อัปเดตค่าในฟอร์ม
   const locationInput = document.getElementById("location");
   if (locationInput) {
     locationInput.value = `Lat: ${lat}, Lng: ${lng}`;
   }
+  $('#addOrgModal').modal('show');
   
   // แสดง marker ชั่วคราวที่ตำแหน่งที่เลือก
   if (window.tempMarker) window.tempMarker.setMap(null);
@@ -498,15 +502,20 @@ async function editOrganization(orgId) {
  * @param {Event} event - เหตุการณ์การคลิกบนแผนที่
  */
 function handleMapClickForEdit(event) {
-  if (!window.isSelectingLocation) return;
+  console.log("Map clicked for edit at:", event.latLng.lat(), event.latLng.lng());
+  
+  // ตรวจสอบว่าอยู่ในโหมดเลือกตำแหน่งหรือไม่
+  if (!window.isSelectingLocation && !isSelectingLocation) {
+    console.log("Not in selecting location mode");
+    return;
+  }
   
   const lat = event.latLng.lat();
   const lng = event.latLng.lng();
   
-  console.log("Map clicked for edit at:", lat, lng);
-  
   // เก็บตำแหน่งที่เลือก
   window.selectedLatLng = event.latLng;
+  selectedLatLng = event.latLng;
   
   // แสดง marker ชั่วคราวที่ตำแหน่งใหม่
   if (window.tempMarker) window.tempMarker.setMap(null);
@@ -537,15 +546,14 @@ function handleMapClickForEdit(event) {
   
   // ปิดโหมดเลือกตำแหน่ง
   window.isSelectingLocation = false;
+  isSelectingLocation = false;
   
   // ลบ event listener
   if (window.map && google && google.maps && google.maps.event) {
     google.maps.event.clearListeners(window.map, 'click');
     
     // เพิ่ม event listener กลับคืน
-    if (typeof window.handleMapClick === 'function') {
-      window.map.addListener("click", window.handleMapClick);
-    }
+    window.map.addListener("click", handleMapClick);
   }
   
   // ซ่อนแถบสถานะการเลือกตำแหน่ง
@@ -554,9 +562,15 @@ function handleMapClickForEdit(event) {
     selectingLocationAlert.classList.add("d-none");
   }
   
-  // เปิด Modal อีกครั้ง
-  $('#editOrgModal').modal('show');
+  // เปิด Modal อีกครั้ง - ใช้ setTimeout เพื่อให้แน่ใจว่า DOM ได้อัปเดตแล้ว
+  console.log("Opening edit modal again");
+  setTimeout(() => {
+    $('#editOrgModal').modal('show');
+  }, 300);
+
+  
 }
+
 
 /**
  * เริ่มการเลือกตำแหน่งใหม่
@@ -567,6 +581,7 @@ function startSelectingNewLocation() {
   
   // เปิดโหมดเลือกตำแหน่ง
   window.isSelectingLocation = true;
+  isSelectingLocation = true; // ต้องตั้งค่าทั้งสองตัวแปร
   
   // แสดงแถบสถานะการเลือกตำแหน่ง
   const selectingLocationAlert = document.getElementById("selectingLocationAlert");
@@ -587,7 +602,6 @@ function startSelectingNewLocation() {
     showToast('Info', 'คลิกบนแผนที่เพื่อเลือกตำแหน่งใหม่', 'info', 'center');
   }
 }
-
 
 
 /**
@@ -856,11 +870,14 @@ function resetEditMode() {
 document.addEventListener("DOMContentLoaded", function() {
   console.log("DOM loaded, fetching organizations...");
   
-  // ตั้งค่า event listener สำหรับปุ่มเลือกตำแหน่งใหม่
   const selectNewLocationBtn = document.getElementById("selectNewLocationBtn");
   if (selectNewLocationBtn) {
     selectNewLocationBtn.addEventListener("click", startSelectingNewLocation);
+    console.log("Set up select new location button");
+  } else {
+    console.error("Select new location button not found");
   }
+
   
   // ตั้งค่า event listener สำหรับปุ่มยกเลิกการเลือกตำแหน่ง
   const cancelSelectLocationBtn = document.getElementById("cancelSelectLocationBtn");
