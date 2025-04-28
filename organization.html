@@ -69,6 +69,7 @@
               <th>#</th>
               <th>ชื่อหน่วยงาน</th>
               <th>Telegram Token</th>
+              <th>Telegram Chat ID</th>
               <th>วันที่สร้าง</th>
               <th>การจัดการ</th>
             </tr>
@@ -99,11 +100,16 @@
                 <input type="text" class="form-control" id="telegramToken" required>
               </div>
               <div class="mb-3">
+                <label for="telegramChatId" class="form-label">Telegram Chat ID</label>
+                <input type="text" class="form-control" id="telegramChatId" required>
+              </div>
+              <div class="mb-3">
                 <label for="location" class="form-label">ตำแหน่ง</label>
                 <input type="text" class="form-control" id="location" disabled>
               </div>
             </form>
           </div>
+          
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
             <button type="button" class="btn btn-primary" id="saveOrgBtn">ยืนยัน</button>
@@ -113,7 +119,7 @@
     </div>
   </div>
 
-  <!-- Modal สำหรับแก้ไขหน่วยงาน -->
+<!-- Modal สำหรับแก้ไขหน่วยงาน -->
 <div class="modal fade" id="editOrgModal" tabindex="-1" aria-labelledby="editOrgModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -132,6 +138,10 @@
             <input type="text" class="form-control" id="editTelegramToken" required>
           </div>
           <div class="mb-3">
+            <label for="editTelegramChatId" class="form-label">Telegram Chat ID</label>
+            <input type="text" class="form-control" id="editTelegramChatId" required>
+          </div>
+          <div class="mb-3">
             <label for="editLocation" class="form-label">ตำแหน่งเดิม</label>
             <input type="text" class="form-control" id="editLocation" disabled>
           </div>
@@ -139,7 +149,6 @@
             <label for="newLocation" class="form-label">ตำแหน่งใหม่</label>
             <input type="text" class="form-control" id="newLocation" placeholder="คลิกบนแผนที่เพื่อเลือกตำแหน่งใหม่">
           </div>
-          
         </form>
       </div>
       <div class="modal-footer">
@@ -150,6 +159,7 @@
   </div>
 </div>
 
+
   <!-- External Scripts -->
   <script src="js/utils/loading.js"></script>
   <script src="js/utils/navbar.js"></script>
@@ -158,26 +168,106 @@
   <script src="js/organization/map-init.js"></script>
   <script src="js/organization/mn_organization.js"></script>
   <script src="js/organization/search_sort.js"></script>
+  <script src="js/utils/telegram.js"></script>
   <!-- Google Maps API --><!-- โหลด jQuery จาก CDN ก่อนที่คุณจะใช้ $ -->
 
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDsGCBKGEvufoikZgscLJSxi-wQ28_c9GQ&callback=initMap&libraries=marker&loading=async"></script>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
-
-  <!-- Service Worker -->
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker
-        .register("sw.js")
-        .then((registration) => {
-          console.log("Service Worker registered with scope:", registration.scope);
-        })
-        .catch((error) => {
-          console.error("Service Worker registration failed:", error);
+<!-- Add this script before the other scripts -->
+<script>
+  // ฟังก์ชันสำหรับบันทึกข้อผิดพลาด
+  function logError(source, error) {
+    console.error(`[${source}] Error: ${error.message || error}`, error);
+    // ถ้าต้องการส่งข้อผิดพลาดไปยังระบบติดตามข้อผิดพลาด (error tracking) สามารถเพิ่มโค้ดที่นี่
+  }
+</script>
+<!-- Add this script before the closing body tag -->
+<script>
+  // ฟังก์ชันสำหรับจัดการข้อมูลหน่วยงาน
+  function handleOrganizationData() {
+    console.log('Initializing organization data handling');
+    
+    // เพิ่ม event listener สำหรับปุ่มบันทึกหน่วยงานใหม่
+    document.getElementById('saveOrgBtn').addEventListener('click', function() {
+      console.log('Save organization button clicked');
+      try {
+        const orgName = document.getElementById('orgName').value.trim();
+        const telegramToken = document.getElementById('telegramToken').value.trim();
+        const telegramChatId = document.getElementById('telegramChatId').value.trim();
+        const location = document.getElementById('location').value.trim();
+        
+        console.log('Organization data to save:', {
+          name: orgName,
+          token: telegramToken ? '(provided)' : '(missing)',
+          chatId: telegramChatId ? '(provided)' : '(missing)',
+          location: location || '(not selected)'
         });
+        
+        // ตรวจสอบข้อมูลที่จำเป็น
+        if (!orgName || !telegramToken || !telegramChatId) {
+          console.warn('Missing required fields');
+          alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+          return;
+        }
+        
+        // ส่งข้อมูลไปยังฟังก์ชันบันทึกข้อมูลหน่วยงาน (ต้องมีการเขียนฟังก์ชันนี้ในไฟล์ mn_organization.js)
+        saveOrganization(orgName, telegramToken, telegramChatId, location);
+      } catch (error) {
+        console.error(`Error saving organization: ${error.message}`, error);
+        alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+      }
+    });
+    
+    // เพิ่ม event listener สำหรับปุ่มอัปเดตหน่วยงาน
+    document.getElementById('updateOrgBtn').addEventListener('click', function() {
+      console.log('Update organization button clicked');
+      try {
+        const orgId = this.getAttribute('data-id');
+        const orgName = document.getElementById('editOrgName').value.trim();
+        const telegramToken = document.getElementById('editTelegramToken').value.trim();
+        const telegramChatId = document.getElementById('editTelegramChatId').value.trim();
+        const newLocation = document.getElementById('newLocation').value.trim();
+        
+        console.log('Organization data to update:', {
+          id: orgId,
+          name: orgName,
+          token: telegramToken ? '(provided)' : '(missing)',
+          chatId: telegramChatId ? '(provided)' : '(missing)',
+          newLocation: newLocation || '(not changed)'
+        });
+        
+        // ตรวจสอบข้อมูลที่จำเป็น
+        if (!orgId || !orgName || !telegramToken || !telegramChatId) {
+          console.warn('Missing required fields for update');
+          alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+          return;
+        }
+        
+        // ส่งข้อมูลไปยังฟังก์ชันอัปเดตข้อมูลหน่วยงาน (ต้องมีการเขียนฟังก์ชันนี้ในไฟล์ mn_organization.js)
+        updateOrganization(orgId, orgName, telegramToken, telegramChatId, newLocation);
+      } catch (error) {
+        console.error(`Error updating organization: ${error.message}`, error);
+        alert('เกิดข้อผิดพลาดในการอัปเดตข้อมูล');
+      }
+    });
+    
+    console.log('Organization data handling initialized');
+  }
+  
+  // เรียกใช้ฟังก์ชันเมื่อโหลดหน้าเว็บเสร็จสมบูรณ์
+  document.addEventListener('DOMContentLoaded', function() {
+    try {
+      console.log('DOM fully loaded');
+      handleOrganizationData();
+    } catch (error) {
+      console.error(`Error initializing page: ${error.message}`, error);
     }
-  </script>
+  });
+</script>
+
+
 </body>
 
 </html>

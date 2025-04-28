@@ -1,449 +1,336 @@
-/**
- * บันทึกข้อมูลหน่วยงานลง Firestore
- * @returns {Promise<void>}
- */
-async function saveOrganization() {
+// ฟังก์ชันสำหรับโหลดรายการหน่วยงานทั้งหมด
+function loadOrganizations() {
+  console.log('Loading organizations');
   try {
-    // ดึงค่าจากฟอร์ม
-    const orgName = document.getElementById("orgName").value.trim();
-    const telegramToken = document.getElementById("telegramToken").value.trim();
-    
-    // ตรวจสอบข้อมูลที่จำเป็น
-    if (!orgName || !telegramToken || !selectedLatLng) {
-      throw new Error("กรุณากรอกข้อมูลให้ครบถ้วนและเลือกตำแหน่งบนแผนที่");
-    }
-
-    // ตรวจสอบชื่อหน่วยงานซ้ำ
     const db = firebase.firestore();
-    const orgRef = db.collection("organizations").doc(orgName);
+    const orgListContainer = document.getElementById('orgListContainer');
     
-    const doc = await orgRef.get();
-    if (doc.exists && !isEditMode) {
-      throw new Error(`หน่วยงาน "${orgName}" มีอยู่แล้วในระบบ`);
+    if (!orgListContainer) {
+      console.error('Organization list container not found');
+      return;
     }
-
-    // แสดง Loading
-    showLoading('กำลังบันทึกข้อมูลหน่วยงาน...');
-
-    // บันทึกข้อมูลลง Firestore
-    await orgRef.set({
-      name: orgName,
-      telegramToken: telegramToken,
-      location: new firebase.firestore.GeoPoint(selectedLatLng.lat(), selectedLatLng.lng()),
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    // แจ้งเตือนสำเร็จและรีเซ็ตฟอร์ม
-    showAlert('success', 'บันทึกข้อมูลสำเร็จ', `หน่วยงาน "${orgName}" ถูกเพิ่มเรียบร้อยแล้ว`);
     
-    // ปิด Modal และรีเฟรชข้อมูล
-    $('#addOrgModal').modal('hide');
-    resetForm();
-    await fetchOrganizations(); // ฟังก์ชันดึงข้อมูลหน่วยงานใหม่
-
-    // รีเซ็ตโหมดการแก้ไข
-    resetEditMode();
+    // เคลียร์ข้อมูลเก่า
+    orgListContainer.innerHTML = '';
     
-  } catch (error) {
-    console.error("Error saving organization:", error);
-    showAlert('error', 'เกิดข้อผิดพลาด', error.message);
-  } finally {
-    hideLoading();
-  }
-}
-
-
-// ฟังก์ชันแสดง Alert แบบสวยงาม
-function showAlert(type, title, message) {
-  // ใช้ Toast, SweetAlert หรือ UI Library อื่นๆ ที่คุณมี
-  // ตัวอย่างใช้ SweetAlert2
-  if (typeof Swal !== 'undefined') {
-    Swal.fire({
-      icon: type,
-      title: title,
-      text: message,
-      confirmButtonText: 'ตกลง'
-    });
-  } else {
-    alert(`${title}: ${message}`);
-  }
-}
-
-function goToLocation(lat, lng) {
-  if (map) {
-    const location = new google.maps.LatLng(lat, lng);
-    map.setCenter(location);
-    map.setZoom(15); // Optional: Adjust the zoom level
-  } else {
-    console.error("Map is not initialized");
-  }
-}
-// ฟังก์ชันรีเซ็ตฟอร์ม
-// ฟังก์ชันที่ใช้ในการแสดงข้อมูลหน่วยงานในตาราง
-async function fetchOrganizations() {
-  try {
-    // ดึงข้อมูลหน่วยงานจาก Firestore
-    const snapshot = await firebase.firestore().collection("organizations").get();
-
-    const orgListContainer = document.getElementById("orgListContainer");
-    orgListContainer.innerHTML = ""; // เคลียร์ข้อมูลที่มีอยู่ก่อน
-
-    let index = 1;
-
-    snapshot.forEach((doc) => {
-      const orgData = doc.data();
-
-      // ตรวจสอบว่ามี location หรือไม่
-      const hasLocation = orgData.location && orgData.location.latitude && orgData.location.longitude;
-
-      // สร้างแถวใหม่ในตาราง
-      const orgItem = document.createElement("tr");
-
-      // เพิ่มข้อมูลลงในแถว
-      orgItem.innerHTML = `
-        <td>${index++}</td>
-        <td>
-          ${
-            hasLocation
-              ? `<a href="#" class="org-link" onclick="goToLocation(${orgData.location.latitude}, ${orgData.location.longitude})">
-                  ${orgData.name}
-                </a>`
-              : orgData.name
+    // ดึงข้อมูลหน่วยงานทั้งหมดจาก Firestore
+    db.collection('organizations').orderBy('createdAt', 'desc').get()
+      .then(querySnapshot => {
+        console.log(`Retrieved ${querySnapshot.size} organizations`);
+        
+        if (querySnapshot.empty) {
+          orgListContainer.innerHTML = '<tr><td colspan="6" class="text-center">ไม่พบข้อมูลหน่วยงาน</td></tr>';
+          return;
+        }
+        
+        // สร้างแถวข้อมูลสำหรับแต่ละหน่วยงาน
+        let index = 1;
+        querySnapshot.forEach(doc => {
+          try {
+            const orgData = doc.data();
+            const orgId = doc.id;
+            
+            // แปลงเวลาให้อยู่ในรูปแบบที่อ่านง่าย
+            const createdAt = orgData.createdAt ? new Date(orgData.createdAt.toDate()).toLocaleString('th-TH') : '-';
+            
+            // สร้างแถวข้อมูล
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${index}</td>
+              <td>${orgData.name || '-'}</td>
+              <td>${orgData.telegramToken ? '✓' : '✗'}</td>
+              <td>${orgData.telegramChatId ? '✓' : '✗'}</td>
+              <td>${createdAt}</td>
+              <td>
+                <button class="btn btn-sm btn-primary edit-org-btn" data-id="${orgId}">แก้ไข</button>
+                <button class="btn btn-sm btn-danger delete-org-btn" data-id="${orgId}">ลบ</button>
+              </td>
+            `;
+            
+            // เพิ่มแถวลงในตาราง
+            orgListContainer.appendChild(row);
+            
+            // เพิ่ม event listener สำหรับปุ่มแก้ไข
+            row.querySelector('.edit-org-btn').addEventListener('click', function() {
+              const orgId = this.getAttribute('data-id');
+              editOrganization(orgId);
+            });
+            
+            // เพิ่ม event listener สำหรับปุ่มลบ
+            row.querySelector('.delete-org-btn').addEventListener('click', function() {
+              const orgId = this.getAttribute('data-id');
+              deleteOrganization(orgId);
+            });
+            
+            index++;
+          } catch (rowError) {
+            console.error(`Error creating row for organization ${doc.id}: ${rowError.message}`, rowError);
           }
-        </td>
-        <td>${orgData.telegramToken || "undefined"}</td>
-        <td>${orgData.createdAt ? orgData.createdAt.toDate().toLocaleString() : "ไม่ระบุ"}</td>
-        <td>
-          <button class="btn btn-warning btn-sm" onclick="editOrganization('${doc.id}')">แก้ไข</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteOrganization('${doc.id}')">ลบ</button>
-        </td>
-      `;
-      orgListContainer.appendChild(orgItem);
-
-        // ตรวจสอบว่ามี location หรือไม่
-  const hasLocations = orgData.location && orgData.location.latitude && orgData.location.longitude;
-
-  if (hasLocation) {
-    // สร้าง Marker
-    const marker = new google.maps.Marker({
-      position: {
-        lat: orgData.location.latitude,
-        lng: orgData.location.longitude,
-      },
-      map: map,
-      title: orgData.name,
-      icon: {
-        url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
-        scaledSize: new google.maps.Size(40, 40)
-      },
-      animation: google.maps.Animation.DROP
-    });
-
-    // เพิ่ม Event Listener ให้ Marker (Optional)
-    marker.addListener("click", () => {
-      map.setCenter(marker.getPosition());
-      map.setZoom(15); // ซูมเมื่อคลิก
-    });
-  }
-  
-    });
+        });
+      })
+      .catch(error => {
+        console.error(`Error getting organizations: ${error.message}`, error);
+        orgListContainer.innerHTML = `<tr><td colspan="6" class="text-center text-danger">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}</td></tr>`;
+      });
   } catch (error) {
-    console.error("Error fetching organizations:", error);
-    showAlert("error", "เกิดข้อผิดพลาด", "ไม่สามารถดึงข้อมูลหน่วยงานได้");
+    console.error(`Error in loadOrganizations: ${error.message}`, error);
+    alert('เกิดข้อผิดพลาดในการโหลดข้อมูลหน่วยงาน');
   }
 }
 
-
-
-// เมื่อคลิกปุ่ม "ยืนยัน"
-document.getElementById("saveOrgBtn").addEventListener("click", async function () {
+// ฟังก์ชันสำหรับบันทึกหน่วยงานใหม่
+function saveOrganization() {
+  console.log('Saving new organization');
   try {
-    // ดึงค่าจากฟอร์ม
-    const orgName = document.getElementById("orgName").value.trim();
-    const telegramToken = document.getElementById("telegramToken").value.trim();
-
-    // ตรวจสอบข้อมูลที่จำเป็น
-    if (!orgName || !telegramToken || !selectedLatLng) {
-      throw new Error("กรุณากรอกข้อมูลให้ครบถ้วนและเลือกตำแหน่งบนแผนที่");
-    }
-
-    // ตรวจสอบรูปแบบ Telegram Token
-    // if (!/^\d+:[a-zA-Z0-9_-]+$/.test(telegramToken)) {
-    //   throw new Error("รูปแบบ Telegram Token ไม่ถูกต้อง");
-    // }
-
-    // ตรวจสอบชื่อหน่วยงานซ้ำ
     const db = firebase.firestore();
-    const orgRef = db.collection("organizations").doc(orgName);
     
-    const doc = await orgRef.get();
-    if (doc.exists) {
-      throw new Error(`หน่วยงาน "${orgName}" มีอยู่แล้วในระบบ`);
+    // ดึงข้อมูลจากฟอร์ม
+    const orgName = document.getElementById('orgName').value.trim();
+    const telegramToken = document.getElementById('telegramToken').value.trim();
+    const telegramChatId = document.getElementById('telegramChatId').value.trim();
+    const locationInput = document.getElementById('location').value.trim();
+    
+    console.log('Form data:', {
+      name: orgName,
+      token: telegramToken ? '(provided)' : '(missing)',
+      chatId: telegramChatId ? '(provided)' : '(missing)',
+      location: locationInput || '(not selected)'
+    });
+    
+    // ตรวจสอบข้อมูลที่จำเป็น
+    if (!orgName) {
+      console.warn('Organization name is required');
+      alert('กรุณาระบุชื่อหน่วยงาน');
+      return;
     }
-
-    // แสดง Loading
-    showLoading('กำลังบันทึกข้อมูลหน่วยงาน...');
-
-    // บันทึกข้อมูลลง Firestore
-    await orgRef.set({
+    
+    // ตรวจสอบว่ามีการเลือกตำแหน่งหรือไม่
+    if (!selectedLatLng && !locationInput) {
+      console.warn('Location is required');
+      alert('กรุณาเลือกตำแหน่งบนแผนที่');
+      return;
+    }
+    
+    // สร้างข้อมูลหน่วยงานใหม่
+    const newOrg = {
       name: orgName,
       telegramToken: telegramToken,
-      location: new firebase.firestore.GeoPoint(selectedLatLng.lat(), selectedLatLng.lng()),
+      telegramChatId: telegramChatId,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    // เพิ่มข้อมูลตำแหน่ง (ถ้ามี)
+    if (selectedLatLng) {
+      newOrg.location = new firebase.firestore.GeoPoint(selectedLatLng.lat, selectedLatLng.lng);
+    }
+    
+    // บันทึกข้อมูลลง Firestore
+    db.collection('organizations').add(newOrg)
+      .then(docRef => {
+        console.log(`Organization added with ID: ${docRef.id}`);
+        
+        // ปิด Modal และรีเซ็ตฟอร์ม
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addOrgModal'));
+        modal.hide();
+        document.getElementById('addOrgForm').reset();
+        
+        // โหลดรายการหน่วยงานใหม่
+        loadOrganizations();
+        
+        // รีเซ็ตตำแหน่งที่เลือก
+        selectedLatLng = null;
+        if (locationMarker) {
+          locationMarker.setMap(null);
+          locationMarker = null;
+        }
+        
+        alert('เพิ่มหน่วยงานสำเร็จ');
+      })
+      .catch(error => {
+        console.error(`Error adding organization: ${error.message}`, error);
+        alert(`เกิดข้อผิดพลาดในการบันทึกข้อมูล: ${error.message}`);
+      });
+  } catch (error) {
+    console.error(`Error in saveOrganization: ${error.message}`, error);
+    alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+  }
+}
+
+// ฟังก์ชันสำหรับแก้ไขหน่วยงาน
+function editOrganization(orgId) {
+  console.log(`Editing organization: ${orgId}`);
+  try {
+    const db = firebase.firestore();
+    
+    // ดึงข้อมูลหน่วยงานจาก Firestore
+    db.collection('organizations').doc(orgId).get()
+      .then(doc => {
+        if (doc.exists) {
+          const orgData = doc.data();
+          console.log('Organization data retrieved:', orgData);
+          
+          // กรอกข้อมูลลงในฟอร์มแก้ไข
+          document.getElementById('editOrgName').value = orgData.name || '';
+          document.getElementById('editTelegramToken').value = orgData.telegramToken || '';
+          document.getElementById('editTelegramChatId').value = orgData.telegramChatId || '';
+          
+          // แสดงข้อมูลตำแหน่ง (ถ้ามี)
+          if (orgData.location) {
+            document.getElementById('editLocation').value = `${orgData.location.latitude}, ${orgData.location.longitude}`;
+          } else {
+            document.getElementById('editLocation').value = '';
+          }
+          
+          // รีเซ็ตข้อมูลตำแหน่งใหม่
+          document.getElementById('newLocation').value = '';
+          
+          // เก็บ ID ของหน่วยงานที่กำลังแก้ไขไว้ในปุ่มอัปเดต
+          document.getElementById('updateOrgBtn').setAttribute('data-id', orgId);
+          
+          // แสดง Modal แก้ไข
+          const editModal = new bootstrap.Modal(document.getElementById('editOrgModal'));
+          editModal.show();
+        } else {
+          console.error(`Organization not found with ID: ${orgId}`);
+          alert('ไม่พบข้อมูลหน่วยงาน');
+        }
+      })
+      .catch(error => {
+        console.error(`Error getting organization: ${error.message}`, error);
+        alert(`เกิดข้อผิดพลาดในการดึงข้อมูล: ${error.message}`);
+      });
+  } catch (error) {
+    console.error(`Error in editOrganization: ${error.message}`, error);
+    alert('เกิดข้อผิดพลาดในการแก้ไขข้อมูล');
+  }
+}
+
+// ฟังก์ชันสำหรับอัปเดตหน่วยงาน
+function updateOrganization(orgId) {
+  console.log(`Updating organization: ${orgId}`);
+  try {
+    const db = firebase.firestore();
+    
+    // ดึงข้อมูลจากฟอร์ม
+    const orgName = document.getElementById('editOrgName').value.trim();
+    const telegramToken = document.getElementById('editTelegramToken').value.trim();
+    const telegramChatId = document.getElementById('editTelegramChatId').value.trim();
+    const newLocationInput = document.getElementById('newLocation').value.trim();
+    
+    console.log('Form data for update:', {
+      id: orgId,
+      name: orgName,
+      token: telegramToken ? '(provided)' : '(missing)',
+      chatId: telegramChatId ? '(provided)' : '(missing)',
+      newLocation: newLocationInput || '(not changed)'
     });
-
-    // แจ้งเตือนสำเร็จและรีเซ็ตฟอร์ม
-    showAlert('success', 'บันทึกข้อมูลสำเร็จ', `หน่วยงาน "${orgName}" ถูกเพิ่มเรียบร้อยแล้ว`);
     
-    // ปิด Modal และรีเฟรชข้อมูล
-    $('#orgModal').modal('hide');
-    resetForm();
-    await fetchOrganizations(); // ฟังก์ชันดึงข้อมูลหน่วยงานใหม่
-
-    $('#addOrgModal').on('hidden.bs.modal', function() {
-  resetLocationSelection();
-});
+    // ตรวจสอบข้อมูลที่จำเป็น
+    if (!orgName) {
+      console.warn('Organization name is required');
+      alert('กรุณาระบุชื่อหน่วยงาน');
+      return;
+    }
     
-  } catch (error) {
-    console.error("Error saving organization:", error);
-    showAlert('error', 'เกิดข้อผิดพลาด', error.message);
-  } finally {
-    hideLoading();
-  }
-});
-
-// ฟังก์ชันที่ใช้ในการแสดงรายการหน่วยงานที่ดึงมาจาก Firestore
-function renderOrganizations(organizations) {
-  const orgListContainer = document.getElementById("orgListContainer"); // สมมุติว่าเรามี container สำหรับแสดงข้อมูลหน่วยงาน
-  
-  // เคลียร์ข้อมูลเก่า
-  orgListContainer.innerHTML = "";
-
-  organizations.forEach(doc => {
-    const orgData = doc.data(); // ดึงข้อมูลจาก Firestore
-
-    // สร้าง HTML สำหรับแสดงหน่วยงาน
-    const orgItem = document.createElement("div");
-    orgItem.classList.add("org-item");
-
-    orgItem.innerHTML = `
-      <h3>${orgData.name}</h3>
-      <p>Telegram Token: ${orgData.telegramToken}</p>
-      <p>ตำแหน่ง: Lat: ${orgData.location.latitude}, Lng: ${orgData.location.longitude}</p>
-      <p>สร้างเมื่อ: ${orgData.createdAt.toDate().toLocaleString()}</p>
-    `;
+    // สร้างข้อมูลที่จะอัปเดต
+    const updateData = {
+      name: orgName,
+      telegramToken: telegramToken,
+      telegramChatId: telegramChatId,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
     
-    // เพิ่มหน่วยงานลงใน container
-    orgListContainer.appendChild(orgItem);
-  });
-}
-
-// ฟังก์ชันแสดง Alert
-function showAlert(type, title, message) {
-  // ใช้ Toast หรือ SweetAlert
-  if (typeof Swal !== 'undefined') {
-    Swal.fire({
-      icon: type,
-      title: title,
-      text: message,
-      confirmButtonText: 'ตกลง'
-    });
-  } else {
-    alert(`${title}: ${message}`);
-  }
-}
-
-async function editOrganization(orgId) {
-  try {
-    const db = firebase.firestore();
-    const orgRef = db.collection("organizations").doc(orgId);
-    const doc = await orgRef.get();
-
-    if (doc.exists) {
-      const orgData = doc.data();
-
-            // เก็บค่าปัจจุบันเพื่อเปรียบเทียบการเปลี่ยนแปลง
-            originalOrgName = orgData.name;
-            originalTelegramToken = orgData.telegramToken;
-            originalLocation = `Lat: ${orgData.location.latitude}, Lng: ${orgData.location.longitude}`;
-      
-      // แสดงข้อมูลในฟอร์ม
-      document.getElementById("editOrgName").value = orgData.name;
-      document.getElementById("editTelegramToken").value = orgData.telegramToken;
-
-      // แสดงข้อมูลตำแหน่งเดิม
-      if (orgData.location && orgData.location.latitude && orgData.location.longitude) {
-        const lat = orgData.location.latitude;
-        const lng = orgData.location.longitude;
-        document.getElementById("editLocation").value = `Lat: ${lat}, Lng: ${lng}`;
-      } else {
-        document.getElementById("editLocation").value = "ไม่พบข้อมูลตำแหน่ง";
-      }
-
-      // ตั้งค่าตำแหน่งใหม่ในฟอร์ม
-      if (selectedLatLng) {
-        const newLat = selectedLatLng.lat();
-        const newLng = selectedLatLng.lng();
-        document.getElementById("newLocation").value = `Lat: ${newLat}, Lng: ${newLng}`;
-      } else {
-        document.getElementById("newLocation").value = null ;
-      }
-
-      // ตั้งค่าให้เรียกฟังก์ชัน updateOrganization เมื่อกดปุ่ม "อัปเดต"
-      document.getElementById("updateOrgBtn").onclick = function() {
-        updateOrganization(orgId);  // เรียกฟังก์ชัน updateOrganization เมื่อกดปุ่ม "อัปเดต"
-      };
-
-      // เปิด Modal แก้ไข
-      $('#editOrgModal').modal('show');
-    } else {
-      alert("ไม่พบข้อมูลหน่วยงานที่ต้องการแก้ไข");
+    // เพิ่มข้อมูลตำแหน่งใหม่ (ถ้ามี)
+    if (selectedLatLng) {
+      updateData.location = new firebase.firestore.GeoPoint(selectedLatLng.lat, selectedLatLng.lng);
     }
+    
+    // อัปเดตข้อมูลใน Firestore
+    db.collection('organizations').doc(orgId).update(updateData)
+      .then(() => {
+        console.log(`Organization updated: ${orgId}`);
+        
+        // ปิด Modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editOrgModal'));
+        modal.hide();
+        
+        // โหลดรายการหน่วยงานใหม่
+        loadOrganizations();
+        
+        // รีเซ็ตตำแหน่งที่เลือก
+        selectedLatLng = null;
+        if (locationMarker) {
+          locationMarker.setMap(null);
+          locationMarker = null;
+        }
+        
+        alert('อัปเดตหน่วยงานสำเร็จ');
+      })
+      .catch(error => {
+        console.error(`Error updating organization: ${error.message}`, error);
+        alert(`เกิดข้อผิดพลาดในการอัปเดตข้อมูล: ${error.message}`);
+      });
   } catch (error) {
-    console.error("Error editing organization:", error);
-    alert("เกิดข้อผิดพลาดในการดึงข้อมูลหน่วยงาน");
+    console.error(`Error in updateOrganization: ${error.message}`, error);
+    alert('เกิดข้อผิดพลาดในการอัปเดตข้อมูล');
   }
 }
 
-
-
-async function updateOrganization(orgId) {
-  const orgName = document.getElementById("editOrgName").value.trim();
-  const telegramToken = document.getElementById("editTelegramToken").value.trim();
-  const newLocation = document.getElementById("newLocation").value.trim(); // ค่าที่ผู้ใช้กรอกหรือเลือก
-
-  if (!orgName || !telegramToken) {
-    alert("กรุณากรอกข้อมูลให้ครบถ้วน");
-    return;
-  }
-
+// ฟังก์ชันสำหรับลบหน่วยงาน
+function deleteOrganization(orgId) {
+  console.log(`Deleting organization: ${orgId}`);
   try {
+    // ถามยืนยันก่อนลบ
+    if (!confirm('คุณต้องการลบหน่วยงานนี้ใช่หรือไม่?')) {
+      console.log('Delete operation cancelled by user');
+      return;
+    }
+    
     const db = firebase.firestore();
-    const orgRef = db.collection("organizations").doc(orgId);
-
-    // สร้างตัวแปรที่ใช้ในการอัปเดตข้อมูล
-    let updatedData = {};
-
-    // ตรวจสอบว่า orgName มีการเปลี่ยนแปลง
-    if (orgName !== originalOrgName) {
-      updatedData.name = orgName;  // ถ้ามีการเปลี่ยนแปลง ชื่อหน่วยงาน
-    }
-
-    // ตรวจสอบว่า telegramToken มีการเปลี่ยนแปลง
-    if (telegramToken !== originalTelegramToken) {
-      updatedData.telegramToken = telegramToken;  // ถ้ามีการเปลี่ยนแปลง Token
-    }
-
-    // ตรวจสอบว่า location มีการเปลี่ยนแปลง
-    if (newLocation && newLocation !== "คลิกแผนที่เพื่อเลือกตำแหน่ง" && newLocation !== originalLocation) {  // ถ้ามีการกรอกตำแหน่งใหม่
-      const location = newLocation.split(",");
-      if (location.length === 2) {
-        const latitude = parseFloat(location[0].replace("Lat:", "").trim());
-        const longitude = parseFloat(location[1].replace("Lng:", "").trim());
-        updatedData.location = new firebase.firestore.GeoPoint(latitude, longitude);  // ถ้ามีการเปลี่ยนแปลง ตำแหน่ง
-      } else {
-        alert("ตำแหน่งไม่ถูกต้อง");
-        return;
-      }
-    } else if (selectedLatLng) {  // ถ้ามีการคลิกตำแหน่งใหม่บนแผนที่
-      const latitude = selectedLatLng.lat();
-      const longitude = selectedLatLng.lng();
-      updatedData.location = new firebase.firestore.GeoPoint(latitude, longitude);  // อัปเดตตำแหน่งใหม่
-    }
-
-    // อัปเดตเฉพาะฟิลด์ที่เปลี่ยนแปลง
-    if (Object.keys(updatedData).length > 0) {
-      updatedData.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
-      await orgRef.update(updatedData);  // อัปเดตข้อมูลที่ถูกเปลี่ยนแปลง
-      alert("ข้อมูลหน่วยงานอัปเดตเรียบร้อยแล้ว");
-    } else {
-      alert("ไม่มีการเปลี่ยนแปลงข้อมูล");
-    }
-
-    // ปิด Modal
-    $('#editOrgModal').modal('hide');
-
-    // รีเฟรชข้อมูลหน่วยงาน
-    fetchOrganizations(); // ฟังก์ชันดึงข้อมูลหน่วยงานใหม่จาก Firestore
-
-  } catch (error) {
-    console.error("Error updating organization:", error);
-    alert("เกิดข้อผิดพลาดในการอัปเดตข้อมูลหน่วยงาน");
-  }
-}
-
-
-
-// ฟังก์ชันสำหรับลบข้อมูลหน่วยงานจาก Firestore
-async function deleteOrganization(orgId) {
-  try {
-    const db = firebase.firestore();
-    const orgRef = db.collection("organizations").doc(orgId);
-
-    // ขอการยืนยันจากผู้ใช้ก่อนลบ
-    const confirmDelete = confirm("คุณต้องการลบหน่วยงานนี้หรือไม่?");
-    if (!confirmDelete) {
-      return;  // ถ้าผู้ใช้ไม่ยืนยันการลบ, ไม่ทำอะไร
-    }
-
+    
     // ลบข้อมูลจาก Firestore
-    await orgRef.delete();
-    
-    // แสดงข้อความแจ้งเตือนว่าได้ลบข้อมูลแล้ว
-    alert("หน่วยงานถูกลบเรียบร้อยแล้ว");
-
-    // รีเฟรชข้อมูลหน่วยงานใหม่
-    fetchOrganizations(); // ฟังก์ชันดึงข้อมูลหน่วยงานใหม่จาก Firestore
-
+    db.collection('organizations').doc(orgId).delete()
+      .then(() => {
+        console.log(`Organization deleted: ${orgId}`);
+        
+        // โหลดรายการหน่วยงานใหม่
+        loadOrganizations();
+        
+        alert('ลบหน่วยงานสำเร็จ');
+      })
+      .catch(error => {
+        console.error(`Error deleting organization: ${error.message}`, error);
+        alert(`เกิดข้อผิดพลาดในการลบข้อมูล: ${error.message}`);
+      });
   } catch (error) {
-    console.error("Error deleting organization:", error);
-    alert("เกิดข้อผิดพลาดในการลบหน่วยงาน");
+    console.error(`Error in deleteOrganization: ${error.message}`, error);
+    alert('เกิดข้อผิดพลาดในการลบข้อมูล');
   }
 }
 
-// ฟังก์ชันที่ใช้จับตำแหน่งที่คลิกบนแผนที่
-function handleMapClick(event) {
-  const lat = event.latLng.lat();
-  const lng = event.latLng.lng();
-
-  // อัปเดตตำแหน่งใหม่ในฟอร์ม
-  document.getElementById("newLocation").value = `Lat: ${lat}, Lng: ${lng}`;
-  selectedLatLng = event.latLng;  // เก็บค่าพิกัดเพื่อใช้ในการบันทึก
-}
-
-
-
-function resetForm() {
-  // ล้างค่าในฟอร์ม
-  const orgNameInput = document.getElementById("orgName");
-  const telegramTokenInput = document.getElementById("telegramToken");
-  const locationInput = document.getElementById("location");
-  const clickedCoordDisplay = document.getElementById("clicked-coord");
-
-  if (orgNameInput) orgNameInput.value = "";
-  if (telegramTokenInput) telegramTokenInput.value = "";
-  if (locationInput) locationInput.value = "คลิกบนแผนที่เพื่อเลือกตำแหน่ง";
+// ตั้งค่า event listener เมื่อโหลดหน้าเว็บ
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM loaded, initializing organization management');
   
-  // รีเซ็ตตัวแปรตำแหน่ง
-  selectedLatLng = null;
-
-  // หากมีองค์ประกอบสำหรับแสดงตำแหน่ง ให้รีเซ็ตข้อความ
-  if (clickedCoordDisplay) {
-    clickedCoordDisplay.textContent = "📍 คลิกบนแผนที่เพื่อเลือกตำแหน่ง";
+  try {
+    // โหลดรายการหน่วยงาน
+    loadOrganizations();
+    
+    // ตั้งค่า event listener สำหรับปุ่มบันทึกหน่วยงานใหม่
+    document.getElementById('saveOrgBtn').addEventListener('click', function() {
+      saveOrganization();
+    });
+    
+    // ตั้งค่า event listener สำหรับปุ่มอัปเดตหน่วยงาน
+    document.getElementById('updateOrgBtn').addEventListener('click', function() {
+      const orgId = this.getAttribute('data-id');
+      updateOrganization(orgId);
+    });
+    
+    console.log('Organization management initialized');
+  } catch (error) {
+    console.error(`Error initializing organization management: ${error.message}`, error);
+    alert('เกิดข้อผิดพลาดในการโหลดหน้าจัดการหน่วยงาน');
   }
-}
-
-
-// ฟังก์ชันรีเซ็ตโหมดการแก้ไข
-function resetEditMode() {
-  isEditMode = false;
-  document.getElementById("saveOrgBtn").textContent = "ยืนยัน"; // เปลี่ยนปุ่มกลับมาเป็น "ยืนยัน"
-  document.getElementById("saveOrgBtn").onclick = saveOrganization; // เปลี่ยนให้เรียกฟังก์ชัน saveOrganization
-}
-
-
-// ฟังก์ชันเริ่มต้นเมื่อหน้าโหลดเสร็จ
-document.addEventListener("DOMContentLoaded", fetchOrganizations);
-
+});
