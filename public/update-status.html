@@ -140,49 +140,124 @@
     });
     
     // ฟังก์ชันอัพเดทสถานะ
-    function updateStatus(newStatus) {
-      // แสดง loading
-      document.getElementById('status-options').style.display = 'none';
-      document.getElementById('result').innerHTML = `
-        <div class="text-center">
-          <div class="spinner-border" role="status">
-            <span class="visually-hidden">กำลังโหลด...</span>
-          </div>
-          <p class="mt-2">กำลังอัพเดทสถานะ...</p>
-        </div>
-      `;
-      
-      // อัพเดทสถานะใน Firestore
-      const db = firebase.firestore();
-      db.collection("deliveries").doc(boxId).update({
-        status: newStatus,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => {
-        // แสดงข้อความสำเร็จ
-        document.getElementById('result').innerHTML = `
-          <div class="alert alert-success">
-            <h4 class="alert-heading">อัพเดทสถานะสำเร็จ!</h4>
-            <p>สถานะของกล่อง ${boxData?.boxNumber || boxId} ถูกเปลี่ยนเป็น "${newStatus}" เรียบร้อยแล้ว</p>
-          </div>
-          <div class="text-center mt-3">
-            <button class="btn btn-secondary" onclick="window.close()">ปิดหน้านี้</button>
-          </div>
-        `;
+// ฟังก์ชันอัพเดทสถานะ
+function updateStatus(newStatus) {
+  // แสดง loading
+  document.getElementById('status-options').style.display = 'none';
+  document.getElementById('result').innerHTML = `
+    <div class="text-center">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">กำลังโหลด...</span>
+      </div>
+      <p class="mt-2">กำลังอัพเดทสถานะ...</p>
+    </div>
+  `;
+  
+  // อัพเดทสถานะใน Firestore
+  const db = firebase.firestore();
+  
+  // เตรียมข้อมูลที่จะอัพเดท
+  const updateData = {
+    status: newStatus,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  
+  // ถ้าเป็นการรับสินค้า ให้เพิ่มข้อมูลเวลาที่รับ
+  if (newStatus === 'จัดส่งสำเร็จ') {
+    updateData.receivedAt = firebase.firestore.FieldValue.serverTimestamp();
+  }
+  
+  db.collection("deliveries").doc(boxId).update(updateData).then(() => {
+    // ถ้าเป็นการรับสินค้า ให้คำนวณระยะเวลาในการจัดส่ง
+    if (newStatus === 'จัดส่งสำเร็จ') {
+      // ดึงข้อมูลล่าสุดเพื่อคำนวณระยะเวลา
+      db.collection("deliveries").doc(boxId).get().then((doc) => {
+        if (doc.exists) {
+          const updatedData = doc.data();
+          let deliveryDuration = "";
+          
+          if (updatedData.createdAt && updatedData.receivedAt) {
+            const createdDate = updatedData.createdAt.toDate ? updatedData.createdAt.toDate() : new Date(updatedData.createdAt);
+            const receivedDate = updatedData.receivedAt.toDate ? updatedData.receivedAt.toDate() : new Date(updatedData.receivedAt);
+            
+            // คำนวณเวลาที่ใช้ในการจัดส่ง
+            const diffTime = Math.abs(receivedDate - createdDate);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const diffHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
+            
+            // สร้างข้อความแสดงเวลาที่ใช้ในการจัดส่ง (แสดงเฉพาะหน่วยที่มีค่า)
+            let timeComponents = [];
+            
+            if (diffDays > 0) {
+              timeComponents.push(`${diffDays} วัน`);
+            }
+            
+            if (diffHours > 0) {
+              timeComponents.push(`${diffHours} ชั่วโมง`);
+            }
+            
+            if (diffMinutes > 0 || timeComponents.length === 0) {
+              timeComponents.push(`${diffMinutes} นาที`);
+            }
+            
+            deliveryDuration = timeComponents.join(' ');
+            
+            // แสดงข้อความสำเร็จพร้อมระยะเวลาในการจัดส่ง
+            document.getElementById('result').innerHTML = `
+              <div class="alert alert-success">
+                <h4 class="alert-heading">อัพเดทสถานะสำเร็จ!</h4>
+                <p>สถานะของกล่อง ${boxData?.boxNumber || boxId} ถูกเปลี่ยนเป็น "${newStatus}" เรียบร้อยแล้ว</p>
+                <hr>
+                <p class="mb-0">ระยะเวลาในการจัดส่ง: <strong>${deliveryDuration}</strong></p>
+              </div>
+              <div class="text-center mt-3">
+                <button class="btn btn-secondary" onclick="window.close()">ปิดหน้านี้</button>
+              </div>
+            `;
+          } else {
+            // กรณีไม่มีข้อมูลเวลาเริ่มต้นหรือเวลาสิ้นสุด
+            showSuccessMessage(newStatus);
+          }
+        } else {
+          showSuccessMessage(newStatus);
+        }
       }).catch((error) => {
-        // แสดงข้อความผิดพลาด
-        document.getElementById('result').innerHTML = `
-          <div class="alert alert-danger">
-            <h4 class="alert-heading">เกิดข้อผิดพลาด</h4>
-            <p>ไม่สามารถอัพเดทสถานะได้: ${error.message}</p>
-          </div>
-          <div class="text-center mt-3">
-            <button class="btn btn-primary" onclick="window.location.reload()">ลองใหม่</button>
-          </div>
-        `;
-        // แสดงปุ่มสถานะอีกครั้ง
-        document.getElementById('status-options').style.display = 'block';
+        showSuccessMessage(newStatus);
       });
+    } else {
+      // กรณีไม่ใช่การรับสินค้า ให้แสดงข้อความสำเร็จปกติ
+      showSuccessMessage(newStatus);
     }
+  }).catch((error) => {
+    // แสดงข้อความผิดพลาด
+    document.getElementById('result').innerHTML = `
+      <div class="alert alert-danger">
+        <h4 class="alert-heading">เกิดข้อผิดพลาด</h4>
+        <p>ไม่สามารถอัพเดทสถานะได้: ${error.message}</p>
+      </div>
+      <div class="text-center mt-3">
+        <button class="btn btn-primary" onclick="window.location.reload()">ลองใหม่</button>
+      </div>
+    `;
+    // แสดงปุ่มสถานะอีกครั้ง
+    document.getElementById('status-options').style.display = 'block';
+  });
+}
+
+// ฟังก์ชันแสดงข้อความสำเร็จปกติ (ไม่มีข้อมูลระยะเวลา)
+function showSuccessMessage(newStatus) {
+  document.getElementById('result').innerHTML = `
+    <div class="alert alert-success">
+      <h4 class="alert-heading">อัพเดทสถานะสำเร็จ!</h4>
+      <p>สถานะของกล่อง ${boxData?.boxNumber || boxId} ถูกเปลี่ยนเป็น "${newStatus}" เรียบร้อยแล้ว</p>
+    </div>
+    <div class="text-center mt-3">
+      <button class="btn btn-secondary" onclick="window.close()">ปิดหน้านี้</button>
+    </div>
+  `;
+}
+
   </script>
   
   <!-- Bootstrap JS -->
